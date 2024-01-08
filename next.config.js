@@ -1,4 +1,9 @@
 /** @type {import('next').NextConfig} */
-const nextConfig = {}
+
+import("./env.mjs");
+const nextConfig = {
+    reactStrictMode:true,
+    swcMinify: true
+}
 
 module.exports = nextConfig
