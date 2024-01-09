@@ -254,7 +254,7 @@ export const LendModel = () => {
                                     <div className="p-3 rounded-xl border border-black/20">
                                         <p className=" font-medium sm:text-sm text-xs">Duration</p>
                                         <div className="flex font-bold text-sm sm:text-base mt-1">
-                                            <p className="text-white">16</p><p className=" ml-1">Days</p>
+                                            <p className="text-black">16</p><p className=" ml-1">Days</p>
                                         </div>
                                     </div>
                                     <div className="p-3 rounded-xl border border-black/20">
@@ -320,7 +320,7 @@ export const LendModel = () => {
                                                         <Input type="number" placeholder={0.00} {...field} />
                                                     </FormControl>
                                                     <FormDescription>
-                                                        <div className="flex">   <img src="https://app.liquidium.fi/static/media/btcSymbol.371279d96472ac8a7b0392d000bf4868.svg" className="mr-2" width={"18"} />  $180.36 USD</div>
+                                                        <div className="flex">   <img src="https://app.liquidium.fi/static/media/btcSymbol.371279d96472ac8a7b0392d000bf4868.svg" className="mr-2"  />  $180.36 USD</div>
                                                     </FormDescription>
                                                     <FormMessage />
                                                 </FormItem>
@@ -331,6 +331,7 @@ export const LendModel = () => {
                                         <Button
                                             variant="outline"
                                             className={"w-full"}
+                                            type="button"
                                             onClick={lendModel.onClose}
                                         >
                                             CLose

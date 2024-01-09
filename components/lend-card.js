@@ -35,7 +35,7 @@ const LendCard = () => {
                 <CardDescription>
                     <div className="mt-5">
                         <div className="w-full grid grid-cols-3 grid-rows-1 gap-2.5" >
-                            <div className="p-3 rounded-xl border border-white/20">
+                            <div className="p-3 rounded-xl border border-black/20">
                                 <p className=" font-medium sm:text-sm text-xs">Floor</p>
                                 <div className="flex font-bold text-sm sm:text-base mt-1">
                                     <img src="https://app.liquidium.fi/static/media/btcSymbol.371279d96472ac8a7b0392d000bf4868.svg" alt="BTC Symbol" className="mr-1 h-5 sm:h-6" />
@@ -43,13 +43,13 @@ const LendCard = () => {
                                     <p className=" "></p>
                                 </div>
                             </div>
-                            <div className="p-3 rounded-xl border border-white/20">
+                            <div className="p-3 rounded-xl border border-black/20">
                                 <p className=" font-medium sm:text-sm text-xs">Duration</p>
                                 <div className="flex font-bold text-sm sm:text-base mt-1">
                                     <p className="text-black">16</p><p className=" ml-1">Days</p>
                                 </div>
                             </div>
-                            <div className="p-3 rounded-xl border border-white/20">
+                            <div className="p-3 rounded-xl border border-black/20">
                                 <p className=" font-medium sm:text-sm text-xs">APY</p>
                                 <div className="flex font-bold text-sm sm:text-base mt-1">
                                     <p className="text-black">90</p>

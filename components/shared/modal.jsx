@@ -37,7 +37,7 @@ export function Modal({children, className, showModal, setShowModal}) {
   }
   return (
     <Dialog open={showModal} onOpenChange={setShowModal}>
-      <DialogContent className="overflow-hidden p-0 md:max-w-md md:rounded-2xl md:border">
+      <DialogContent className="overflow-hidden p-0 md:max-w-lg md:rounded-2xl md:border">
         {children}
       </DialogContent>
     </Dialog>
