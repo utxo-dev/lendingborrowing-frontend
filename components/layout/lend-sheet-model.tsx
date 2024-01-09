@@ -9,13 +9,14 @@ import { Button } from "@/components/ui/button";
 import { siteConfig } from "@/config/site";
 import { useWalletModal } from "@/hooks/use-wallet-model";
 import { useToast } from "@/components/ui/use-toast"
-import { useRouter } from "next/navigation";
+import React from "react";
+import { useLendSheetModal } from "@/hooks/use-lend-sheet-model";
 
 
 
-export const WalletModal = () => {
-  const router = useRouter();
-  const walletModal = useWalletModal();
+export const LendSheetModal = () => {
+//   const router = useRouter();
+  const lendModal = useLendSheetModal();
   const { toast } = useToast()
   const [walletClicked, setWalletClicked] = useState(false);
 
@@ -24,14 +25,14 @@ export const WalletModal = () => {
   let [ ordinalsAddress, setOrdinalsAddress ] = useState();
   let [ ordinalsPublicKey, setOrdinalsPublicKey ] = useState();
 
-  useEffect(() => {
+//   useEffect(() => {
 
-    setPaymentsAddress(localStorage.getItem("paymentsAddress"))
-    setPaymentsPublicKey(localStorage.getItem("paymentsPublicKey"))
-    setOrdinalsAddress(localStorage.getItem("ordinalsAddress"))
-    setOrdinalsPublicKey(localStorage.getItem("ordinalsPublicKey"))
+//     setPaymentsAddress(localStorage.getItem("paymentsAddress"))
+//     setPaymentsPublicKey(localStorage.getItem("paymentsPublicKey"))
+//     setOrdinalsAddress(localStorage.getItem("ordinalsAddress"))
+//     setOrdinalsPublicKey(localStorage.getItem("ordinalsPublicKey"))
 
-  })
+//   })
 
   function onConnect(
     paymentsAddress_, 
@@ -88,18 +89,14 @@ export const WalletModal = () => {
         },
 }
 
-function onXverseConnect() {
-    walletModal.onClose();
-    getAddress(getAddressOptions)
-}
+
+
 
   return (
-    <Modal showModal={walletModal.isOpen} setShowModal={walletModal.onClose}>
+    <Modal showModal={lendModal.isOpen} setShowModal={lendModal.onClose}>
       <div className="w-full">
-        <div className="flex flex-col items-center justify-start space-y-3 border-b bg-background px-4 py-6 pt-8  md:px-8">
-          {/* <a href={siteConfig.url}>
-            <Icons.logo className="size-10" />
-          </a> */}
+        {/* <div className="flex flex-col items-center justify-start space-y-3 border-b bg-background px-4 py-6 pt-8  md:px-8">
+         
           <h3 className="font-urban text-2xl font-bold">Select Wallet</h3>
             <div className="grid grid-cols-3 w-full">
           <button onClick={onXverseConnect} className="flex flex-col justify-center items-center hover:opacity-70 transition-opacity gap-1 ">
@@ -113,17 +110,17 @@ function onXverseConnect() {
           <p className="text-sm text-gray-500">
           By connecting a wallet, you agree to UTXO.dev Terms of Service and consent to its Privacy Policy.
           </p>
-        </div>
+        </div> */}
 
         <div className="flex flex-col space-y-4 bg-secondary/10 px-4 py-4 md:px-16">
           <Button
             variant="default"
             disabled={walletClicked}
-            onClick={() => {
+            onClick={ 
             //   setWalletClicked(true);
-            walletModal.onClose();
+            lendModal.onClose()
 
-            }}
+            }
           >
             {/* {walletClicked ? (
               <Icons.spinner className="mr-2 size-4 animate-spin" />

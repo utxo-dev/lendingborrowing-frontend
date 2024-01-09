@@ -13,10 +13,10 @@ export const marketingConfig = {
     {
       title: "Portfolio",
       href: "/portfolio",
-    },
-    {
-      title: "Documentation",
-      href: "/docs",
-    },
+    }
+    // {
+    //   title: "Documentation",
+    //   href: "/docs",
+    // },
   ],
 }

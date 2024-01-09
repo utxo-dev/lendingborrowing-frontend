@@ -28,8 +28,8 @@ export default async function IndexPage() {
             style={{ animationDelay: "0.25s", animationFillMode: "forwards" }}
           >
           Your Sequential Unleashes Worth.  {" "}
-            <span className="text-gradient_indigo-purple font-extrabold">
-            Your Bitcoin Expands.
+            <span className="bg-gradient_orange">
+            Your  Bitcoin Expands.
             </span>
           </h1>
 
@@ -44,20 +44,17 @@ export default async function IndexPage() {
             className="flex animate-fade-up justify-center space-x-2  md:space-x-4"
             style={{ animationDelay: "0.4s", animationFillMode: "forwards" }}
           >
-            <Link href="/lend" className={cn(buttonVariants({ size: "lg" }))}>
+            <Link href="/lend" className={cn(buttonVariants({ size: "lg" }), "text-balance font-urban font-bold tracking-tight text-2xl ")}>
              Lend
             </Link>
             <Link
               href={"/borrow"}
-              target="_blank"
+           
               rel="noreferrer"
-              className={cn(buttonVariants({ variant: "outline", size: "lg" }), "px-4")}
+              className={cn(buttonVariants({ variant: "outline", size: "lg" }), "px-4 button-gradient_indigo-orange text-balance font-urban font-bold tracking-tight text-2xl text-white")}
             >
-          
-              <p>
               Borrow
-                {/* <span className="font-semibold">{nFormatter(stars)}</span> */}
-              </p>
+          
             </Link>
           </div>
         </div>

@@ -10,7 +10,7 @@ import { Button } from "@/components/ui/button";
 
 
 
-const LoanStatusCard = () => {
+const BorrowCard = () => {
     return <div className=" px-4 py-4">
         <Card className="rounded-2xl flex flex-col  border bg-card text-card-foreground shadow ">
             <CardHeader>
@@ -31,7 +31,7 @@ const LoanStatusCard = () => {
                 </CardTitle>
                 <CardDescription>
                     <div className="mt-5">
-                        <div className="w-full grid grid-cols-2 md:grid-cols-3 grid-rows-1 gap-2.5" >
+                        <div className="w-full grid grid-cols-3 grid-rows-1 gap-2.5" >
                             <div className="p-3 rounded-xl border border-white/20">
                                 <p className=" font-medium sm:text-sm text-xs">Floor</p>
                                 <div className="flex font-bold text-sm sm:text-base mt-1">
@@ -58,7 +58,7 @@ const LoanStatusCard = () => {
                 </CardDescription>
             </CardHeader>
             <CardContent>
-                <p className="text-2xl font-bold  mt-8">Loan Amount</p>
+                {/* <p className="text-2xl font-bold  mt-8">Loan Amount</p>
 
                 <div className="mt-4">
                     <div className="w-full bg-gray-600 rounded-xl px-4 py-3">
@@ -69,13 +69,13 @@ const LoanStatusCard = () => {
                             </div>
                         </div>
                     </div>
-                </div>
+                </div> */}
                 <div className="mt-4">
-                    <Button type="submit" variant="default" className={"w-full font-bold"}>Repay Loan</Button>
+                    <Button type="submit" variant="default" className={"w-full font-bold"}>Borrow</Button>
                 </div>
             </CardContent>
         </Card>
     </div>
 }
 
-export default LoanStatusCard;
+export default BorrowCard;

@@ -1,6 +1,7 @@
 "use client"
 
 import { useState, useEffect } from "react"
+import { Image } from "next/image"
 
 import { Button } from "@/components/ui/button"
 import { Checkbox } from "@/components/ui/checkbox"
@@ -114,7 +115,7 @@ export default function BorrowComponent() {
                                 <div className="p-3 rounded-xl border border-white/20">
                                     <p className=" font-medium sm:text-sm text-xs">Floor</p>
                                     <div className="flex font-bold text-sm sm:text-base mt-1">
-                                        <img src="https://app.liquidium.fi/static/media/btcSymbol.371279d96472ac8a7b0392d000bf4868.svg" alt="BTC Symbol" className="mr-1 h-5 sm:h-6" />
+                                        <Image src="https://app.liquidium.fi/static/media/btcSymbol.371279d96472ac8a7b0392d000bf4868.svg" alt="BTC Symbol" className="mr-1 h-5 sm:h-6" />
                                         <p className="text-black">0.264</p>
                                         <p className=" "></p>
                                     </div>

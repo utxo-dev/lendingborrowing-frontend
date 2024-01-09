@@ -4,14 +4,14 @@ import { env } from "@/env.mjs";
 const site_url = env.NEXT_PUBLIC_APP_URL;
 
 export const siteConfig = {
-  name: "UTXO",
+  name: "UTXO.dev",
   description:
-    "Get your project off to an explosive start with SaaS Starter! Harness the power of Next.js 14, Prisma, Planetscale, Auth.js, Resend, React Email, Shadcn/ui and Stripe to build your next big thing.",
+    "Explore a revolutionary lending and borrowing experience on our Bitcoin platform—unlocking financial possibilities through seamless, secure, and efficient transactions.",
   url: site_url,
   ogImage: `${site_url}/og.jpg`,
   links: {
-    twitter: "https://twitter.com/miickasmt",
-    github: "https://github.com/mickasmt/next-saas-stripe-starter",
+    twitter: "https://twitter.com/utxolabs",
+    // github: "https://github.com/mickasmt/next-saas-stripe-starter",
   },
-  mailSupport: "support@saas-starter.com"
+  mailSupport: "support@utxo.dev"
 }

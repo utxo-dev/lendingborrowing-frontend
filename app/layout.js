@@ -1,6 +1,8 @@
 import "./globals.css";
 
 import  { fontSans, fontHeading, fontUrban } from "@/assets"
+import NextTopLoader from 'nextjs-toploader';
+
 import { Analytics } from "@/components/vercel-analytics";
 import { ModalProvider } from "@/components/modal-provider";
 import { ThemeProvider } from "@/components/theme-provider";
@@ -71,7 +73,9 @@ export default function RootLayout({ children }) {
           fontHeading.variable
         )}
       >
+          <NextTopLoader />
         <ThemeProvider attribute="class" defaultTheme="system" enableSystem disableTransitionOnChange>
+
           {children}
           <Analytics />
           <Toaster />

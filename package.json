@@ -20,6 +20,8 @@
     "@scure/btc-signer": "^1.2.0",
     "@t3-oss/env-nextjs": "^0.7.1",
     "@vercel/analytics": "^1.1.1",
+    "add": "^2.0.6",
+    "card": "^2.5.4",
     "class-variance-authority": "^0.7.0",
     "clsx": "^2.1.0",
     "framer-motion": "^10.17.9",
@@ -28,10 +30,14 @@
     "next": "14.0.4",
     "next-themes": "^0.2.1",
     "nextjs-google-analytics": "^2.3.3",
+    "nextjs-progressbar": "^0.0.16",
+    "nextjs-toploader": "^1.6.4",
+    "npx": "^10.2.2",
     "react": "^18",
     "react-dom": "^18",
     "react-hook-form": "^7.49.2",
     "sats-connect": "^1.1.2",
+    "shadcn-ui": "^0.6.0",
     "tailwind-merge": "^2.2.0",
     "tailwindcss-animate": "^1.0.7",
     "vaul": "^0.8.0",
@@ -39,10 +45,13 @@
     "zustand": "^4.4.7"
   },
   "devDependencies": {
+    "@types/node": "20.10.7",
+    "@types/react": "18.2.47",
     "autoprefixer": "^10.0.1",
     "eslint": "^8",
     "eslint-config-next": "14.0.4",
     "postcss": "^8",
-    "tailwindcss": "^3.3.0"
+    "tailwindcss": "^3.3.0",
+    "typescript": "5.3.3"
   }
 }
