@@ -11,6 +11,7 @@ import { Button, buttonVariants } from "@/components/ui/button";
 import Link from "next/link";
 import { cn } from "@/lib/utils";
 import { useWalletModal } from "@/hooks/use-wallet-model";
+import { useWalletAddress } from "@/hooks/use-wallet-address"
 
 export function NavBar({
   user,
@@ -21,28 +22,24 @@ export function NavBar({
 }) {
   const scrolled = useScroll(50);
   const signInModal = useWalletModal();
+  const walletAddress = useWalletAddress();
 
-  let [paymentsAddress, setPaymentsAddress] = useState();
-  let [paymentsPublicKey, setPaymentsPublicKey] = useState();
-  let [ordinalsAddress, setOrdinalsAddress] = useState();
-  let [ordinalsPublicKey, setOrdinalsPublicKey] = useState();
+ 
 
   useEffect(() => {
-    setPaymentsAddress(localStorage.getItem("paymentsAddress"));
-    setPaymentsPublicKey(localStorage.getItem("paymentsPublicKey"));
-    setOrdinalsAddress(localStorage.getItem("ordinalsAddress"));
-    setOrdinalsPublicKey(localStorage.getItem("ordinalsPublicKey"));
-  });
+    walletAddress.updatePaymentAddress(localStorage.getItem("paymentsAddress"));
+    walletAddress.updatePaymentPublicKey(localStorage.getItem("paymentsPublicKey"));
+    walletAddress.updateOrdinalAddress(localStorage.getItem("ordinalsAddress"));
+    walletAddress.updateOrdinalPublicKey(localStorage.getItem("ordinalsPublicKey"));
+  }, []);
 
   const disconnectWallet = () => {
     localStorage.removeItem("paymentsAddress");
     localStorage.removeItem("paymentsPublicKey");
     localStorage.removeItem("ordinalsAddress");
     localStorage.removeItem("ordinalsPublicKey");
-    setPaymentsAddress(null);
-    setPaymentsPublicKey(null);
-    setOrdinalsAddress(null);
-    setOrdinalsPublicKey(null);
+    walletAddress.deleteAllWallet();
+
   };
 
   return (
@@ -68,7 +65,7 @@ export function NavBar({
               </Link>
             ) : null} */}
 
-          { ordinalsAddress&& ordinalsAddress ? (
+          { walletAddress.ordinalsAddress&& walletAddress.ordinalsAddress ? (
             <UserAccountNav user={user} disconnectWallet={disconnectWallet} />
           ) : (
             <Button

@@ -30,39 +30,12 @@ import Connect from "@/components/connect"
 import { signTransaction } from 'sats-connect'
 import * as btc from 'micro-btc-signer'
 import { hex, base64 } from '@scure/base'
+import {env} from "@/env.mjs"
 
-const CONTRACT_ADDRESS = "tb1p33z9l755s9f4a26g59jpxw3lctu8uxe7keszm2w32wk6xreccgdq9f50l2";
-const FEES = 1000;
-
-const formSchema = z.object({
-    offer_amount: z.number(),
-    interest_amount: z.number(),
-    input_plus_btc: z.number()
-})
-
-const bitcoinTestnet = {
-    bech32: 'tb',
-    pubKeyHash: 0x6f,
-    scriptHash: 0xc4,
-    wif: 0xef,
-}
 
 export default function LendingComponent() {
 
-    let [paymentsAddress, setPaymentsAddress] = useState();
-    let [paymentsPublicKey, setPaymentsPublicKey] = useState();
-    let [ordinalsAddress, setOrdinalsAddress] = useState();
-    let [ordinalsPublicKey, setOrdinalsPublicKey] = useState();
-
-
-    useEffect(() => {
-
-        setPaymentsAddress(localStorage.getItem("paymentsAddress"))
-        setPaymentsPublicKey(localStorage.getItem("paymentsPublicKey"))
-        setOrdinalsAddress(localStorage.getItem("ordinalsAddress"))
-        setOrdinalsPublicKey(localStorage.getItem("ordinalsPublicKey"))
-
-    })
+   
 
     const form = useForm({
         defaultValues: {

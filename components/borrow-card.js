@@ -1,3 +1,4 @@
+'use client'
 import {
     Card,
     CardContent,
@@ -7,10 +8,12 @@ import {
     CardTitle,
 } from "@/components/ui/card"
 import { Button } from "@/components/ui/button";
-
+import { useBorrowSheetModal } from "@/hooks/use-borrow-sheet-model"
 
 
 const BorrowCard = () => {
+
+    const borrowModel = useBorrowSheetModal();
     return <div className=" px-4 py-4">
         <Card className="rounded-2xl flex flex-col  border bg-card text-card-foreground shadow ">
             <CardHeader>
@@ -71,7 +74,7 @@ const BorrowCard = () => {
                     </div>
                 </div> */}
                 <div className="mt-4">
-                    <Button type="submit" variant="default" className={"w-full font-bold"}>Borrow</Button>
+                    <Button onClick={borrowModel.onOpen} variant="default" className={"w-full font-bold"}>Borrow</Button>
                 </div>
             </CardContent>
         </Card>

@@ -1,3 +1,5 @@
+import { create } from 'zustand';
+
 export const useLendSheetModal = create((set) => ({
     isOpen: false,
     onOpen: () => set({ isOpen: true }),

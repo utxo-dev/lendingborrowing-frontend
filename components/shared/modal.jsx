@@ -16,7 +16,7 @@ export function Modal({children, className, showModal, setShowModal}) {
 
   if (isMobile) {
     return (
-      <Drawer.Root open={showModal} onClose={setShowModal}>
+      <Drawer.Root open={showModal} onClose={setShowModal} shouldScaleBackground>
         <Drawer.Overlay className="fixed inset-0 z-40 bg-background/80 backdrop-blur-sm" />
         <Drawer.Portal>
           <Drawer.Content

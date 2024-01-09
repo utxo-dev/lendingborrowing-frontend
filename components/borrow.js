@@ -36,20 +36,7 @@ const FormSchema = z.object({
 
 export default function BorrowComponent() {
 
-    let [paymentsAddress, setPaymentsAddress] = useState();
-    let [paymentsPublicKey, setPaymentsPublicKey] = useState();
-    let [ordinalsAddress, setOrdinalsAddress] = useState();
-    let [ordinalsPublicKey, setOrdinalsPublicKey] = useState();
-
-
-    useEffect(() => {
-
-        setPaymentsAddress(localStorage.getItem("paymentsAddress"))
-        setPaymentsPublicKey(localStorage.getItem("paymentsPublicKey"))
-        setOrdinalsAddress(localStorage.getItem("ordinalsAddress"))
-        setOrdinalsPublicKey(localStorage.getItem("ordinalsPublicKey"))
-
-    })
+    
 
     function onConnect(
         paymentsAddress_,
@@ -58,14 +45,14 @@ export default function BorrowComponent() {
         ordinalsPublicKey_
     ) {
 
-        setPaymentsAddress(paymentsAddress_)
-        localStorage.setItem("paymentsAddress", paymentsAddress_)
-        setPaymentsPublicKey(paymentsPublicKey_)
-        localStorage.setItem("paymentsPublicKey", paymentsPublicKey_)
-        setOrdinalsAddress(ordinalsAddress_)
-        localStorage.setItem("ordinalsAddress", ordinalsAddress_)
-        setOrdinalsPublicKey(ordinalsPublicKey_)
-        localStorage.setItem("ordinalsPublicKey", ordinalsPublicKey_)
+        // setPaymentsAddress(paymentsAddress_)
+        // localStorage.setItem("paymentsAddress", paymentsAddress_)
+        // setPaymentsPublicKey(paymentsPublicKey_)
+        // localStorage.setItem("paymentsPublicKey", paymentsPublicKey_)
+        // setOrdinalsAddress(ordinalsAddress_)
+        // localStorage.setItem("ordinalsAddress", ordinalsAddress_)
+        // setOrdinalsPublicKey(ordinalsPublicKey_)
+        // localStorage.setItem("ordinalsPublicKey", ordinalsPublicKey_)
 
     }
 

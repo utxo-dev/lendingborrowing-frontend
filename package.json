@@ -9,6 +9,10 @@
     "lint": "next lint"
   },
   "dependencies": {
+    "@cmdcode/buff-utils": "^2.0.0",
+    "@cmdcode/crypto-utils": "^2.4.6",
+    "@cmdcode/tapscript": "^1.4.4",
+    "@hookform/resolvers": "^3.3.4",
     "@radix-ui/react-avatar": "^1.0.4",
     "@radix-ui/react-checkbox": "^1.0.4",
     "@radix-ui/react-dialog": "^1.0.5",
@@ -35,7 +39,7 @@
     "npx": "^10.2.2",
     "react": "^18",
     "react-dom": "^18",
-    "react-hook-form": "^7.49.2",
+    "react-hook-form": "^7.49.3",
     "sats-connect": "^1.1.2",
     "shadcn-ui": "^0.6.0",
     "tailwind-merge": "^2.2.0",

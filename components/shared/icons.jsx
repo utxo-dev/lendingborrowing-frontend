@@ -38,10 +38,10 @@ import {
     ellipsis: MoreVertical,
     gitHub: ({ ...props }) => (
       <svg
-        aria-hidden="true"
+        ariaHidden="true"
         focusable="false"
-        data-prefix="fab"
-        data-icon="github"
+        dataPrefix="fab"
+        dataIcon="github"
         role="img"
         xmlns="http://www.w3.org/2000/svg"
         viewBox="0 0 496 512"
@@ -55,10 +55,10 @@ import {
     ),
     google: ({ ...props }) => (
       <svg
-        aria-hidden="true"
+        ariaHidden="true"
         focusable="false"
-        data-prefix="fab"
-        data-icon="google"
+        dataPrefix="fab"
+        dataIcon="google"
         role="img"
         xmlns="http://www.w3.org/2000/svg"
         viewBox="0 0 488 512"
@@ -83,7 +83,7 @@ import {
       <svg
         xmlns="http://www.w3.org/2000/svg"
         viewBox="0 0 24 24"
-        aria-hidden="true"
+        ariaHidden="true"
         focusable="false"
         data-prefix="fab"
         data-icon="twitter"

@@ -8,6 +8,8 @@ import { Modal } from "@/components/shared/modal";
 import { Button } from "@/components/ui/button";
 import { siteConfig } from "@/config/site";
 import { useWalletModal } from "@/hooks/use-wallet-model";
+import { useWalletAddress } from "@/hooks/use-wallet-address"
+
 import { useToast } from "@/components/ui/use-toast"
 import { useRouter } from "next/navigation";
 
@@ -16,22 +18,24 @@ import { useRouter } from "next/navigation";
 export const WalletModal = () => {
   const router = useRouter();
   const walletModal = useWalletModal();
+  const walletAddress = useWalletAddress();
+
   const { toast } = useToast()
   const [walletClicked, setWalletClicked] = useState(false);
 
-  let [ paymentsAddress, setPaymentsAddress ] = useState();
-  let [ paymentsPublicKey, setPaymentsPublicKey ] = useState();
-  let [ ordinalsAddress, setOrdinalsAddress ] = useState();
-  let [ ordinalsPublicKey, setOrdinalsPublicKey ] = useState();
+  // let [ paymentsAddress, setPaymentsAddress ] = useState();
+  // let [ paymentsPublicKey, setPaymentsPublicKey ] = useState();
+  // let [ ordinalsAddress, setOrdinalsAddress ] = useState();
+  // let [ ordinalsPublicKey, setOrdinalsPublicKey ] = useState();
 
-  useEffect(() => {
+  // useEffect(() => {
 
-    setPaymentsAddress(localStorage.getItem("paymentsAddress"))
-    setPaymentsPublicKey(localStorage.getItem("paymentsPublicKey"))
-    setOrdinalsAddress(localStorage.getItem("ordinalsAddress"))
-    setOrdinalsPublicKey(localStorage.getItem("ordinalsPublicKey"))
+  //   setPaymentsAddress(localStorage.getItem("paymentsAddress"))
+  //   setPaymentsPublicKey(localStorage.getItem("paymentsPublicKey"))
+  //   setOrdinalsAddress(localStorage.getItem("ordinalsAddress"))
+  //   setOrdinalsPublicKey(localStorage.getItem("ordinalsPublicKey"))
 
-  })
+  // })
 
   function onConnect(
     paymentsAddress_, 
@@ -40,13 +44,13 @@ export const WalletModal = () => {
     ordinalsPublicKey_
   ) {
 
-      setPaymentsAddress(paymentsAddress_)
+    walletAddress.updatePaymentAddress(paymentsAddress_)
       localStorage.setItem("paymentsAddress", paymentsAddress_)
-      setPaymentsPublicKey(paymentsPublicKey_)
+      walletAddress.updatePaymentPublicKey(paymentsPublicKey_)
       localStorage.setItem("paymentsPublicKey", paymentsPublicKey_)
-      setOrdinalsAddress(ordinalsAddress_)
+      walletAddress.updateOrdinalAddress(ordinalsAddress_)
       localStorage.setItem("ordinalsAddress", ordinalsAddress_)
-      setOrdinalsPublicKey(ordinalsPublicKey_)
+      walletAddress.updateOrdinalPublicKey(ordinalsPublicKey_)
       localStorage.setItem("ordinalsPublicKey", ordinalsPublicKey_)
       // router.reload();
 
