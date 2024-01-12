@@ -28,8 +28,6 @@ const LoanStatusCard = () => {
                             </div>
                         </div>
                     </div>
-                </CardTitle>
-                <CardDescription>
                     <div className="mt-5">
                         <div className="w-full grid grid-cols-2 md:grid-cols-3 grid-rows-1 gap-2.5" >
                             <div className="p-3 rounded-xl border border-white/20">
@@ -55,7 +53,8 @@ const LoanStatusCard = () => {
                             </div>
                         </div>
                     </div>
-                </CardDescription>
+                </CardTitle>
+               
             </CardHeader>
             <CardContent>
                 <p className="text-2xl font-bold  mt-8">Loan Amount</p>

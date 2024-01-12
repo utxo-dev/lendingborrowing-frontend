@@ -376,8 +376,6 @@ export const BorrowModal = () => {
                                     </div>
                                 </div>
                             </div>
-                        </CardTitle>
-                        <CardDescription>
                             <div className="mt-5">
                                 <div className="w-full grid grid-cols-3 grid-rows-1 gap-2.5" >
                                     <div className="p-3 rounded-xl border border-black/20">
@@ -401,7 +399,7 @@ export const BorrowModal = () => {
                                     </div>
                                 </div>
                             </div>
-                        </CardDescription>
+                        </CardTitle>
                     </CardHeader>
                     <CardContent>
 
