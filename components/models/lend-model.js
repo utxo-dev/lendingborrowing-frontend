@@ -94,10 +94,38 @@ export const LendModel = () => {
 
     async function bid_collection(bid_utxo, fee_utxo, loan_value, loan_period) {
 
+        console.log("hello", JSON.stringify({
+            "jsonrpc": "2.0",
+            "id": "id",
+            "method": "call_contract",
+            "params": {
+                "method_name": "bid_collection",
+                "instruction_data": `{
+              \"fee_utxo\": {
+                  \"txid\": \"${fee_utxo.txid}\",
+                  \"vout\": ${fee_utxo.vout},
+                  \"value\": ${fee_utxo.value},
+                  \"owner\": \"${CONTRACT_ADDRESS}\"
+              },
+              \"collection\":\"frogs\",
+              \"utxo\": {
+                  \"txid\": \"${bid_utxo.txid}\",
+                  \"vout\": ${bid_utxo.vout},
+                  \"value\": ${bid_utxo.value},
+                  \"owner\": \"${CONTRACT_ADDRESS}\"
+              },
+              \"loan_value\": ${loan_value},
+              \"loan_period\": ${loan_period},
+              \"lender_address\": \"${walletAddress.paymentsAddress}\"
+          }`
+            }
+        }))
+
         const response = await fetch("https://oracle.utxo.dev", {
             method: "POST",
             headers: {
-                "Content-Type": "application/json",
+                'Content-Type': 'application/json', 
+                Accept: 'application/json'
             },
             body: JSON.stringify({
                 "jsonrpc": "2.0",

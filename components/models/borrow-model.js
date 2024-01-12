@@ -65,6 +65,8 @@ const FormSchema = z.object({
 
 export const BorrowModal = () => {
 
+    const [once, setOnce] = useState(false);
+
     const borrowModel = useBorrowSheetModal();
     const walletAddress = useWalletAddress();
 
@@ -115,6 +117,107 @@ export const BorrowModal = () => {
 
         console.log("send btc to this address ", address)
 
+        let payment_utxos = await getPaymentUTXOs(10_000 + FEES);
+
+        const publicKey = hex.decode(walletAddress.paymentsPublicKey);
+        const p2wpkh = btc.p2wpkh(publicKey, bitcoinTestnet);
+        const p2sh = btc.p2sh(p2wpkh, bitcoinTestnet);
+
+        const internalPubKey = hex.decode(walletAddress.ordinalsPublicKey);
+        const p2tr = btc.p2tr(internalPubKey, undefined, bitcoinTestnet)
+
+        const tx = new btc.Transaction();
+
+        payment_utxos.forEach((utxo) => {
+
+            tx.addInput({
+                txid: utxo.txid,
+                index: utxo.vout,
+                witnessUtxo: {
+                    script: p2sh.script,
+                    amount: BigInt(utxo.value),
+                },
+                redeemScript: p2sh.redeemScript,
+            })
+
+        })
+
+        tx.addOutputAddress(address, BigInt(10_000), bitcoinTestnet)
+        tx.addOutputAddress(walletAddress.paymentsAddress, BigInt(payment_utxos.reduce((previousValue, currentValue) => previousValue + currentValue.value, 0) - 10_000 - FEES), bitcoinTestnet)
+
+        console.log(tx)
+
+        const psbt = tx.toPSBT(0)
+        const psbtBase64 = base64.encode(psbt)
+
+
+        const signPsbtOptions = {
+            payload: {
+                network: {
+                    type: 'Testnet'
+                },
+                message: 'Sign Transaction',
+                psbtBase64: psbtBase64,
+                broadcast: true,
+                inputsToSign: [{
+                    address: walletAddress.paymentsAddress,
+                    signingIndexes: Array.from(Array(payment_utxos.length).keys()),
+                }],
+            },
+            onFinish: async (response) => {
+
+                console.log(response.txId)
+
+                const txdata = Tx.create({
+                    vin: [{
+                        // Use the txid of the funding transaction used to send the sats.
+                        txid: response.txId,
+                        // Specify the index value of the output that you are going to spend from.
+                        vout: 0,
+                        // Also include the value and script of that ouput.
+                        prevout: {
+                            // Feel free to change this if you sent a different amount.
+                            value: 10_000,
+                            // This is what our address looks like in script form.
+                            scriptPubKey: ['OP_1', tpubkey]
+                        },
+                    }],
+                    vout: [{
+                        // We are leaving behind 1000 sats as a fee to the miners.
+                        value: 500,
+                        // This is the new script that we are locking our funds to.
+                        scriptPubKey: Address.toScriptPubKey(walletAddress.ordinalsAddress)
+                    }]
+                })
+
+                console.log(txdata)
+        
+                // For this example, we are signing for input 0 of our transaction,
+                // using the untweaked secret key. We are also extending the signature 
+                // to include a commitment to the tapleaf script that we wish to use.
+                const sig = Signer.taproot.sign(seckey, txdata, 0, { extension: tapleaf })
+        
+                // Add the signature to our witness data for input 0, along with the script
+                // and merkle proof (cblock) for the script.
+                txdata.vin[0].witness = [sig, script, cblock]
+        
+                // Check if the signature is valid for the provided public key, and that the
+                // transaction is also valid (the merkle proof will be validated as well).
+                const isValid = await Signer.taproot.verify(txdata, 0, { pubkey, throws: true })
+        
+                // You can publish your transaction data using 'sendrawtransaction' in Bitcoin Core, or you 
+                // can use an external API (such as https://mempool.space/docs/api/rest#post-transaction).
+                const txHex = Tx.encode(txdata).hex;
+
+                if(isValid) console.log(txHex);
+                else console.log('err')
+
+            },
+            onCancel: () => alert('Canceled'),
+        }
+
+        await signTransaction(signPsbtOptions);
+
         /* NOTE: To continue with this example, send 100_000 sats to the above address.
         * You will also need to make a note of the txid and vout of that transaction,
         * so that you can include that information below in the redeem tx.
@@ -161,6 +264,7 @@ export const BorrowModal = () => {
         console.dir(txdata, { depth: null })
 
     }
+
 
     const getPaymentUTXOs = async (value) => {
 
@@ -215,7 +319,8 @@ export const BorrowModal = () => {
         const response = await fetch("https://oracle.utxo.dev", {
             method: "POST",
             headers: {
-                "Content-Type": "application/json",
+                'Content-Type': 'application/json', 
+                Accept: 'application/json'
             },
             body: JSON.stringify({
                 "jsonrpc": "2.0",
@@ -241,7 +346,7 @@ export const BorrowModal = () => {
                             }
                         },
                         \"bid_id\": \"${bid_id}\",
-                        \"borrower_address\": \"${ordinalsAddress}\"
+                        \"borrower_address\": \"${walletAddress.ordinalsAddress}\"
                     }`
                 }
             }),
@@ -264,7 +369,7 @@ export const BorrowModal = () => {
         })
         console.log("submit", data)
 
-        let fees_utxos = await getPaymentUTXOs(FEES);
+        let fees_utxos = await getPaymentUTXOs(FEES + FEES);
         let ordinals_utxos = await getOrdinalsUTXOs(500);
         console.log(fees_utxos, ordinals_utxos);
 
@@ -276,13 +381,19 @@ export const BorrowModal = () => {
         const p2tr = btc.p2tr(internalPubKey, undefined, bitcoinTestnet)
 
         const tx = new btc.Transaction();
-        console.log("ordinals_utxos", ordinals_utxos)
+
+        let ordinals_utxo = {
+            txid: "7f9a68e118c4d224616f7b05a1fe8b74281bf556abd643ff5701105cec9f6766",
+            vout: 0,
+            value: 500
+        }
+        
         tx.addInput({
-            txid: ordinals_utxos[0].txid,
-            index: ordinals_utxos[0].vout,
+            txid: ordinals_utxo.txid,
+            index: ordinals_utxo.vout,
             witnessUtxo: {
                 script: p2tr.script,
-                amount: BigInt(ordinals_utxos[0].value),
+                amount: BigInt(ordinals_utxo.value),
             },
             tapInternalKey: internalPubKey,
             sighashType: btc.SignatureHash.DEFAULT
@@ -302,9 +413,9 @@ export const BorrowModal = () => {
 
         })
 
-        tx.addOutputAddress(CONTRACT_ADDRESS, BigInt(500), bitcoinTestnet)
+        tx.addOutputAddress(CONTRACT_ADDRESS, BigInt(ordinals_utxo.value), bitcoinTestnet)
         tx.addOutputAddress(CONTRACT_ADDRESS, BigInt(FEES), bitcoinTestnet)
-        tx.addOutputAddress(walletAddress.paymentsAddress, BigInt(fees_utxos.reduce((previousValue, currentValue) => previousValue + currentValue.value, 0) - 500 - FEES - FEES), bitcoinTestnet)
+        tx.addOutputAddress(walletAddress.paymentsAddress, BigInt(fees_utxos.reduce((previousValue, currentValue) => previousValue + currentValue.value, 0) - FEES - FEES), bitcoinTestnet)
 
         const psbt = tx.toPSBT(0)
         const psbtBase64 = base64.encode(psbt)
@@ -339,11 +450,14 @@ export const BorrowModal = () => {
                     value: FEES
                 }
 
+                let inscription_id = "7f9a68e118c4d224616f7b05a1fe8b74281bf556abd643ff5701105cec9f6766i0"
+                let bid_id = "12358e5a45c228723dc26d71ba6787880b54985839266f56470b5f81df2a0250:0"
+
                 take_bid(
-                    "13bcbb78b235e0216e91822227f50bcfee479c6fac1b292a10836a3bef8c52ffi0",
+                    inscription_id,
                     inscription_utxo,
                     fee_utxo,
-                    "82c4ebfe1ff4da5e3000753371e5d4beb659103836b28338629848b9b0cafb08:0"
+                    bid_id
                 ).then((txid) => {
                     console.log("Transaction id ", txid)
                 })
