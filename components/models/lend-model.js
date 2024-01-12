@@ -121,7 +121,7 @@ export const LendModel = () => {
                   },
                   \"loan_value\": ${loan_value},
                   \"loan_period\": ${loan_period},
-                  \"lender_address\": \"${paymentsAddress}\"
+                  \"lender_address\": \"${walletAddress.paymentsAddress}\"
               }`
                 }
             }),
@@ -239,8 +239,7 @@ export const LendModel = () => {
                                     </div>
                                 </div>
                             </div>
-                        </CardTitle>
-                        <CardDescription>
+
                             <div className="mt-5">
                                 <div className="w-full grid grid-cols-3 grid-rows-1 gap-2.5" >
                                     <div className="p-3 rounded-xl border border-black/20">
@@ -266,7 +265,8 @@ export const LendModel = () => {
                                     </div>
                                 </div>
                             </div>
-                        </CardDescription>
+                        </CardTitle>
+                        
                     </CardHeader>
                     <CardContent>
 
@@ -297,14 +297,14 @@ export const LendModel = () => {
                                                     <FormControl>
                                                         <Input type="number" placeholder={0.00} {...field} />
                                                     </FormControl>
-                                                    <FormDescription>
-                                                        <div className="flex flex-row justify-between">
-                                                            <div className="flex flex-row">Best:
-                                                                <img src="https://app.liquidium.fi/static/media/btcSymbol.371279d96472ac8a7b0392d000bf4868.svg" className="mx-2" /> 0.1752</div>
+                                                    <FormDescription className="flex flex-row justify-between">
+                                                       
+                                                            <p className="flex flex-row">Best:
+                                                                <img src="https://app.liquidium.fi/static/media/btcSymbol.371279d96472ac8a7b0392d000bf4868.svg" className="mx-2" /> 0.1752</p>
 
-                                                            <div>$7913.67 USD</div>
+                                                            <p>$7913.67 USD</p>
 
-                                                        </div>
+                                                        
                                                     </FormDescription>
                                                     <FormMessage />
                                                 </FormItem>
@@ -319,8 +319,8 @@ export const LendModel = () => {
                                                     <FormControl>
                                                         <Input type="number" placeholder={0.00} {...field} />
                                                     </FormControl>
-                                                    <FormDescription>
-                                                        <div className="flex">   <img src="https://app.liquidium.fi/static/media/btcSymbol.371279d96472ac8a7b0392d000bf4868.svg" className="mr-2"  />  $180.36 USD</div>
+                                                    <FormDescription className="flex">
+                                                          <img src="https://app.liquidium.fi/static/media/btcSymbol.371279d96472ac8a7b0392d000bf4868.svg" className="mr-2"  />  <span>$180.36 USD</span>
                                                     </FormDescription>
                                                     <FormMessage />
                                                 </FormItem>

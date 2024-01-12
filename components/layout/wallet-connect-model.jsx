@@ -8,7 +8,8 @@ import { Modal } from "@/components/shared/modal";
 import { Button } from "@/components/ui/button";
 import { siteConfig } from "@/config/site";
 import { useWalletModal } from "@/hooks/use-wallet-model";
-import { useWalletAddress } from "@/hooks/use-wallet-address"
+import { useWalletAddress } from "@/hooks/use-wallet-address";
+
 
 import { useToast } from "@/components/ui/use-toast"
 import { useRouter } from "next/navigation";
@@ -19,6 +20,7 @@ export const WalletModal = () => {
   const router = useRouter();
   const walletModal = useWalletModal();
   const walletAddress = useWalletAddress();
+
 
   const { toast } = useToast()
   const [walletClicked, setWalletClicked] = useState(false);
