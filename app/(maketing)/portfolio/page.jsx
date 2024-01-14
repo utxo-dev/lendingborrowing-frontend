@@ -75,7 +75,7 @@ export default function PortfolioPage() {
           {
             activeLoans.map((active_loan) => {
               return (
-                <LoanStatusCard loan={active_loan} />
+                <LoanStatusCard key={active_loan.loan_id} loan={active_loan} />
               )
             })
           }
