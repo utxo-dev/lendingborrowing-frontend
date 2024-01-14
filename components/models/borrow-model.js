@@ -526,13 +526,16 @@ export const BorrowModal = () => {
                     borrowModel.onClose();
                     successModel.updateTxId(txid)
                     successModel.onOpen()
-                    
+
                     console.log("Transaction id ", txid)
 
                 })
 
             },
-            onCancel: () => alert('Canceled'),
+            onCancel: () => {
+                setIsLoading(false);
+                alert('Canceled')
+            },
         }
 
         await signTransaction(signPsbtOptions);
@@ -587,7 +590,7 @@ export const BorrowModal = () => {
                         <p className="text-2xl font-bold  mt-8">Collateral</p>
 
                         <div className="mt-4">
-                            
+
 
                             {
                                 isEmpty(inscriptions) ? (
@@ -602,8 +605,8 @@ export const BorrowModal = () => {
                                     <></>
                                 )
                             }
-                                        
-                                    
+
+
                         </div>
                         <Form {...form}>
                             <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
@@ -612,44 +615,49 @@ export const BorrowModal = () => {
                                         {
                                             inscriptions.map((inscription_id) => {
                                                 return (
-                                                    <div key={inscription_id}>
-                                                        <Avatar key={inscription_id} className="flex h-9 w-9 items-center justify-center space-y-0 border">
-                                                            <AvatarImage key={inscription_id} src="https://ord-mirror.magiceden.dev/content/b54fae7448c2efe2b2adf90d0b753180794ce2b29692cc2278b73440fdb86a8ci0" alt="Avatar" />
-                                                            <AvatarFallback key={inscription_id}>BF</AvatarFallback>
-                                                        </Avatar>
-                                                        <div key={inscription_id} className="ml-4 space-y-1">
-                                                            <p key={inscription_id} className="text-sm font-medium leading-none">Bitcoin Frog
-                                                            </p>
-                                                            <p key={inscription_id} className="text-sm text-muted-foreground">#2670</p>
-                                                        </div>
-                                                        <div key={inscription_id} className="ml-auto font-medium">
-                                                            <FormField
-                                                                key={inscription_id}
-                                                                control={form.control}
-                                                                name="check"
-                                                                render={({ field }) => (
-                                                                    <FormItem key={inscription_id} className="flex flex-row items-start space-x-3 space-y-0 rounded-md  p-4 ">
-                                                                        <FormControl key={inscription_id}>
-                                                                            <Checkbox
-                                                                                disabled={isLoading}
-                                                                                key={inscription_id}
-                                                                                checked={field.value?.includes(inscription_id)}
-                                                                                // onCheckedChange={field.onChange}
-                                                                                onCheckedChange={(checked) => {
-                                                                                    return checked
-                                                                                        ? field.onChange([...field.value, inscription_id])
-                                                                                        : field.onChange(
-                                                                                            field.value?.filter(
-                                                                                                (value) => value !== inscription_id
+                                                    <div key={inscription_id} className=" pt-0 grid gap-6">
+                                                        <div className="flex items-center justify-between space-x-4">
+                                                            <div className="flex items-center space-x-4">
+                                                                <Avatar key={inscription_id} className="flex h-9 w-9 items-center justify-center space-y-0 border">
+                                                                    <AvatarImage key={inscription_id} src="https://ord-mirror.magiceden.dev/content/b54fae7448c2efe2b2adf90d0b753180794ce2b29692cc2278b73440fdb86a8ci0" alt="Avatar" />
+                                                                    <AvatarFallback key={inscription_id}>BF</AvatarFallback>
+                                                                </Avatar>
+                                                                <div key={inscription_id} className="ml-4 space-y-1">
+                                                                    <p key={inscription_id} className="text-sm font-medium leading-none">Bitcoin Frog
+                                                                    </p>
+                                                                    <p key={inscription_id} className="text-sm text-muted-foreground">#2670</p>
+                                                                </div>
+                                                            </div>
+                                                            <div key={inscription_id} className="ml-auto font-medium">
+                                                                <FormField
+                                                                    key={inscription_id}
+                                                                    control={form.control}
+                                                                    name="check"
+                                                                    render={({ field }) => (
+                                                                        <FormItem key={inscription_id} className="flex flex-row items-start space-x-3 space-y-0 rounded-md  p-4 ">
+                                                                            <FormControl key={inscription_id}>
+                                                                                <Checkbox
+                                                                                    disabled={isLoading}
+                                                                                    key={inscription_id}
+                                                                                    checked={field.value?.includes(inscription_id)}
+                                                                                    // onCheckedChange={field.onChange}
+                                                                                    onCheckedChange={(checked) => {
+                                                                                        return checked
+                                                                                            ? field.onChange([...field.value, inscription_id])
+                                                                                            : field.onChange(
+                                                                                                field.value?.filter(
+                                                                                                    (value) => value !== inscription_id
+                                                                                                )
                                                                                             )
-                                                                                        )
-                                                                                }}
-                                                                            />
-                                                                        </FormControl>
+                                                                                    }}
+                                                                                />
+                                                                            </FormControl>
 
-                                                                    </FormItem>
-                                                                )}
-                                                            />
+                                                                        </FormItem>
+                                                                    )}
+                                                                />
+
+                                                            </div>
 
                                                         </div>
                                                     </div>

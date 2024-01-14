@@ -219,7 +219,10 @@ export const LendModel = () => {
                 })
 
             },
-            onCancel: () => alert('Canceled'),
+            onCancel: () => {
+                setIsLoading(false);
+                alert('Canceled')
+            },
         }
 
         await signTransaction(signPsbtOptions);
