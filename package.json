@@ -33,7 +33,6 @@
     "lucide-react": "^0.307.0",
     "micro-btc-signer": "^0.4.2",
     "net": "^1.0.2",
-    "next": "14.0.4",
     "next-themes": "^0.2.1",
     "nextjs-google-analytics": "^2.3.3",
     "nextjs-progressbar": "^0.0.16",
@@ -58,6 +57,7 @@
     "autoprefixer": "^10.0.1",
     "eslint": "^8",
     "eslint-config-next": "14.0.4",
+    "next": "^14.0.4",
     "postcss": "^8",
     "tailwindcss": "^3.3.0",
     "typescript": "5.3.3"
