@@ -592,23 +592,24 @@ export const BorrowModal = () => {
                                         {
                                             inscriptions.map((inscription_id) => {
                                                 return (
-                                                    <>
-                                                        <Avatar className="flex h-9 w-9 items-center justify-center space-y-0 border">
-                                                            <AvatarImage src="https://ord-mirror.magiceden.dev/content/b54fae7448c2efe2b2adf90d0b753180794ce2b29692cc2278b73440fdb86a8ci0" alt="Avatar" />
-                                                            <AvatarFallback>BF</AvatarFallback>
+                                                    <div key={inscription_id}>
+                                                        <Avatar key={inscription_id} className="flex h-9 w-9 items-center justify-center space-y-0 border">
+                                                            <AvatarImage key={inscription_id} src="https://ord-mirror.magiceden.dev/content/b54fae7448c2efe2b2adf90d0b753180794ce2b29692cc2278b73440fdb86a8ci0" alt="Avatar" />
+                                                            <AvatarFallback key={inscription_id}>BF</AvatarFallback>
                                                         </Avatar>
-                                                        <div className="ml-4 space-y-1">
-                                                            <p className="text-sm font-medium leading-none">Bitcoin Frog
+                                                        <div key={inscription_id} className="ml-4 space-y-1">
+                                                            <p key={inscription_id} className="text-sm font-medium leading-none">Bitcoin Frog
                                                             </p>
-                                                            <p className="text-sm text-muted-foreground">#2670</p>
+                                                            <p key={inscription_id} className="text-sm text-muted-foreground">#2670</p>
                                                         </div>
-                                                        <div className="ml-auto font-medium">
+                                                        <div key={inscription_id} className="ml-auto font-medium">
                                                             <FormField
+                                                                key={inscription_id}
                                                                 control={form.control}
                                                                 name="check"
                                                                 render={({ field }) => (
-                                                                    <FormItem className="flex flex-row items-start space-x-3 space-y-0 rounded-md  p-4 ">
-                                                                        <FormControl>
+                                                                    <FormItem key={inscription_id} className="flex flex-row items-start space-x-3 space-y-0 rounded-md  p-4 ">
+                                                                        <FormControl key={inscription_id}>
                                                                             <Checkbox
                                                                                 key={inscription_id}
                                                                                 checked={field.value?.includes(inscription_id)}
@@ -630,7 +631,7 @@ export const BorrowModal = () => {
                                                             />
 
                                                         </div>
-                                                    </>
+                                                    </div>
                                                 )
                                             })
                                         }
