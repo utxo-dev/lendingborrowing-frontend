@@ -12,7 +12,7 @@ const EmptyState = () => {
     autoplay
     style={{ height: '400px', width: '400px' }}
 />
-    <div className='text-sm text-muted-foreground pb-2 text-center'>No Result</div>
+    <div className='text-2xl font-semibold text-muted-foreground pb-2 text-center'>No loans found</div>
     </div>
     )
     
