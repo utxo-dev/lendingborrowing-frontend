@@ -1,5 +1,5 @@
 "use client";
-
+import { ReloadIcon } from "@radix-ui/react-icons"
 import { useState, useEffect } from "react";
 import Image from "next/image";
 import { getAddress, AddressPurpose, BitcoinNetworkType } from "sats-connect";
@@ -29,6 +29,7 @@ import {
 import * as site from "@/config/site";
 import { useLendSheetModal } from "@/hooks/use-lend-sheet-model";
 import { useWalletAddress } from "@/hooks/use-wallet-address";
+import { useSuccessModal } from "@/hooks/use-success-model";
 import { signTransaction } from "sats-connect";
 import * as btc from "micro-btc-signer";
 import { hex, base64 } from "@scure/base";
@@ -60,6 +61,8 @@ export const LendModel = () => {
 
     const lendModel = useLendSheetModal();
     const walletAddress = useWalletAddress();
+    const successModel = useSuccessModal();
+    const [isLoading, setIsLoading] = useState();
 
     const form = useForm({
         defaultValues: {
@@ -189,7 +192,7 @@ export const LendModel = () => {
                 }],
             },
             onFinish: (response) => {
-
+                setIsLoading(true);
                 let bid_utxo = {
                     txid: response.txId,
                     vout: 0,
@@ -207,11 +210,19 @@ export const LendModel = () => {
                     Math.floor(parseFloat(values.offer_amount) * 100000000) + Math.floor(parseFloat(values.interest_amount) * 100000000),
                     30 * 24 * 60 * 60
                 ).then((txid) => {
+                    setIsLoading(false);
+                    lendModel.onClose();
+                    successModel.updateTxId(txid);
+                    successModel.onOpen();
+                    
                     console.log("Transaction id ", txid)
                 })
 
             },
-            onCancel: () => alert('Canceled'),
+            onCancel: () => {
+                setIsLoading(false);
+                alert('Canceled')
+            },
         }
 
         await signTransaction(signPsbtOptions);
@@ -297,7 +308,7 @@ export const LendModel = () => {
                                                         Enter Offer Amount
                                                     </FormLabel>
                                                     <FormControl>
-                                                        <Input type="number" placeholder={0.00} {...field} />
+                                                        <Input type="number" disabled={isLoading} placeholder={0.00} {...field} />
                                                     </FormControl>
                                                     <FormDescription className="flex flex-row justify-between">
                                                        
@@ -319,7 +330,7 @@ export const LendModel = () => {
                                                 <FormItem>
                                                     <FormLabel>Total Interest Amount</FormLabel>
                                                     <FormControl>
-                                                        <Input type="number" placeholder={0.00} {...field} />
+                                                        <Input type="number" disabled={isLoading} placeholder={0.00} {...field} />
                                                     </FormControl>
                                                     <FormDescription className="flex">
                                                           <img src="https://app.liquidium.fi/static/media/btcSymbol.371279d96472ac8a7b0392d000bf4868.svg" className="mr-2"  />  <span>$180.36 USD</span>
@@ -344,7 +355,16 @@ export const LendModel = () => {
 
                                                 <></>
 
-                                            ) : (<Button type="submit" variant="default" className={"w-full"}>OFFER</Button>)
+                                            ) : (
+                                                <Button type="submit" variant="default" disabled={isLoading} className={"w-full"}>
+                                           {
+                                            isLoading ? <>
+                                                    <ReloadIcon className="mr-2 h-4 w-4 animate-spin" />
+                                                    Please wait...
+                                                </> : <>OFFER</>
+                                           }
+                                           </Button>
+                                            )
                                         }
                                     </div>
                                 </form>

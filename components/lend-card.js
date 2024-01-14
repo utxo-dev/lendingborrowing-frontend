@@ -8,12 +8,14 @@ import {
     CardTitle,
 } from "@/components/ui/card"
 import { useLendSheetModal } from "@/hooks/use-lend-sheet-model"
+import { useSuccessModal } from "@/hooks/use-success-model";
 import { Button } from "@/components/ui/button";
 
 
 
 const LendCard = () => {
     const lendModel =  useLendSheetModal();
+    const successModel = useSuccessModal();
     return <div className=" px-4 py-4">
         <Card className="rounded-2xl flex flex-col  border bg-card text-card-foreground shadow ">
             <CardHeader>
@@ -74,6 +76,8 @@ const LendCard = () => {
                 </div> */}
                 <div className="mt-4">
                     <Button onClick={lendModel.onOpen}  variant="default" className={"w-full font-bold"}>Lend</Button>
+
+
                 </div>
             </CardContent>
         </Card>

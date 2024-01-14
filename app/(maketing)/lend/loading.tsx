@@ -24,7 +24,7 @@ export default function Loading() {
         </div>
       </section>
 
-      <hr className='container' />
+     
     </div>
   );
 }

@@ -6,13 +6,16 @@ import {
     CardHeader,
     CardTitle,
 } from "@/components/ui/card"
+import { ReloadIcon } from "@radix-ui/react-icons"
 import { Button } from "@/components/ui/button";
 import { env } from "@/env.mjs";
 import { useEffect } from "react";
 import { useWalletAddress } from "@/hooks/use-wallet-address";
+import { useSuccessModal } from "@/hooks/use-success-model";
 import { signTransaction } from 'sats-connect'
 import * as btc from 'micro-btc-signer'
 import { hex, base64 } from '@scure/base'
+import { useState } from "react";
 
 const bitcoinTestnet = {
     bech32: 'tb',
@@ -27,10 +30,8 @@ const FEES = 2000;
 const LoanStatusCard = ({loan}) => {
 
     const walletAddress = useWalletAddress();
-
-    useEffect(() => {
-        console.log(loan)
-    })
+    const successModel = useSuccessModal();
+    const [isLoading, setIsLoading] = useState();
 
     const getPaymentUTXOs = async (value) => {
 
@@ -133,6 +134,7 @@ const LoanStatusCard = ({loan}) => {
                 }],
             },
             onFinish: (response) => {
+                setIsLoading(true);
 
                 let fee_utxo = {
                     txid: response.txId,
@@ -144,11 +146,18 @@ const LoanStatusCard = ({loan}) => {
                     loan.inscription.inscription_id,
                     fee_utxo
                 ).then((txid) => {
+                    setIsLoading(false);
+                    //borrowModel.onClose();
+                    successModel.updateTxId(txid)
+                    successModel.onOpen()
                     console.log("Transaction id ", txid)
                 })
 
             },
-            onCancel: () => alert('Canceled'),
+            onCancel: () => {
+                setIsLoading(false);
+                alert('Canceled')
+            },
         }
 
         await signTransaction(signPsbtOptions);
@@ -245,6 +254,7 @@ const LoanStatusCard = ({loan}) => {
                 }],
             },
             onFinish: (response) => {
+                setIsLoading(true);
 
                 let repayment_utxo = {
                     txid: response.txId,
@@ -262,11 +272,18 @@ const LoanStatusCard = ({loan}) => {
                     repayment_utxo,
                     fee_utxo
                 ).then((txid) => {
+                    setIsLoading(false);
+                    //borrowModel.onClose();
+                    successModel.updateTxId(txid)
+                    successModel.onOpen()
                     console.log("Transaction id ", txid)
                 })
 
             },
-            onCancel: () => alert('Canceled'),
+            onCancel: () => {
+                setIsLoading(false);
+                alert('Canceled')
+            },
         }
 
         await signTransaction(signPsbtOptions);
@@ -334,9 +351,25 @@ const LoanStatusCard = ({loan}) => {
                 <div className="mt-4">
                     {
                         loan.borrower_ordinals_address == walletAddress.ordinalsAddress && ( Math.floor(Date.now() / 1000) - loan.loan_started_at ) < loan.loan_period ? (
-                            <Button type="submit" variant="default" className={"w-full font-bold"} onClick={onRepayLoan}>Repay Loan</Button>
+                            //<Button type="submit" variant="default" className={"w-full font-bold"} onClick={onRepayLoan}>Repay Loan</Button>
+                            <Button type="submit" variant="default" className={"w-full"} disabled={isLoading} onClick={onRepayLoan}>
+                                {
+                                    isLoading ? <>
+                                        <ReloadIcon className="mr-2 h-4 w-4 animate-spin" />
+                                        Please wait...
+                                    </> : <>Repay Loan</>
+                                }
+                            </Button>
                         ) : (
-                            <Button type="submit" variant="default" className={"w-full font-bold"} onClick={onDefaultLoan}>Default Loan</Button>
+                            //<Button type="submit" variant="default" className={"w-full font-bold"} onClick={onDefaultLoan}>Default Loan</Button>
+                            <Button type="submit" variant="default" className={"w-full"} disabled={isLoading} onClick={onDefaultLoan}>
+                                {
+                                    isLoading ? <>
+                                        <ReloadIcon className="mr-2 h-4 w-4 animate-spin" />
+                                        Please wait...
+                                    </> : <>Default Loan</>
+                                }
+                            </Button>
                         )
                     }
                 </div>

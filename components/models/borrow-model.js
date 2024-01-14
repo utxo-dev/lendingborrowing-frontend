@@ -1,5 +1,5 @@
 "use client";
-
+import { ReloadIcon } from "@radix-ui/react-icons"
 import { useState, useEffect } from "react";
 import Image from "next/image";
 import { getAddress, AddressPurpose, BitcoinNetworkType } from 'sats-connect'
@@ -31,6 +31,7 @@ import { Checkbox } from "@/components/ui/checkbox"
 import { siteConfig } from "@/config/site";
 import { useBorrowSheetModal } from "@/hooks/use-borrow-sheet-model";
 import { useWalletAddress } from "@/hooks/use-wallet-address"
+import { useSuccessModal } from "@/hooks/use-success-model";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
 import * as z from "zod";
@@ -43,6 +44,7 @@ import { Address, Signer, Tap, Tx, } from '@cmdcode/tapscript'
 import { signTransaction } from 'sats-connect'
 import * as btc from 'micro-btc-signer'
 import { hex, base64 } from '@scure/base'
+import { isEmpty } from "@/lib/utils";
 
 const bitcoinTestnet = {
     bech32: 'tb',
@@ -53,10 +55,10 @@ const bitcoinTestnet = {
 
 const CONTRACT_ADDRESS = env.NEXT_PUBLIC_TESTNET_CONTRACT_ADDRESS;
 const FEES = 2000;
-const frog_inscriptions = [ 
-    "7b608a26c3ae1dfe7839cf428c817bf705172e2f2cb0f1ec21ce054849dffc8ci0", 
-    "8bfd7db20b07c67a8aecc58fa45f8e42d696ab329c8c095446d6c399411aec6di0", 
-    "d3a21da02e21df88caabd4e725dd18549c5bb4c21b8c7c178616e0f9ef9c828ai0", 
+const frog_inscriptions = [
+    "7b608a26c3ae1dfe7839cf428c817bf705172e2f2cb0f1ec21ce054849dffc8ci0",
+    "8bfd7db20b07c67a8aecc58fa45f8e42d696ab329c8c095446d6c399411aec6di0",
+    "d3a21da02e21df88caabd4e725dd18549c5bb4c21b8c7c178616e0f9ef9c828ai0",
     "1eb1cdfbc28879661443770d88a20f88b703591e6008fcf3055214c6d7f3fa0di0",
     "69ca8a1f0d182c80bacc6c8432607dec468d92e0dd07097dd82b54398d2aa64bi0"
 ];
@@ -73,7 +75,9 @@ export const BorrowModal = () => {
 
     const borrowModel = useBorrowSheetModal();
     const walletAddress = useWalletAddress();
-    const [ inscriptions, setInscriptions ] = useState([]);
+    const successModel = useSuccessModal();
+    const [inscriptions, setInscriptions] = useState([]);
+    const [isLoading, setIsLoading] = useState();
 
     const get_inscription_utxo = async (inscription_id) => {
 
@@ -113,7 +117,7 @@ export const BorrowModal = () => {
         const response = await fetch("https://oracle.utxo.dev", {
             method: "POST",
             headers: {
-                'Content-Type': 'application/json', 
+                'Content-Type': 'application/json',
                 Accept: 'application/json'
             },
             body: JSON.stringify({
@@ -127,9 +131,9 @@ export const BorrowModal = () => {
         });
 
         const result = await response.json();
-        
+
         return JSON.parse(result.result).map((val) => JSON.parse(val))
-        
+
     }
 
     useEffect(() => {
@@ -259,25 +263,25 @@ export const BorrowModal = () => {
                 })
 
                 console.log(txdata)
-        
+
                 // For this example, we are signing for input 0 of our transaction,
                 // using the untweaked secret key. We are also extending the signature 
                 // to include a commitment to the tapleaf script that we wish to use.
                 const sig = Signer.taproot.sign(seckey, txdata, 0, { extension: tapleaf })
-        
+
                 // Add the signature to our witness data for input 0, along with the script
                 // and merkle proof (cblock) for the script.
                 txdata.vin[0].witness = [sig, script, cblock]
-        
+
                 // Check if the signature is valid for the provided public key, and that the
                 // transaction is also valid (the merkle proof will be validated as well).
                 const isValid = await Signer.taproot.verify(txdata, 0, { pubkey, throws: true })
-        
+
                 // You can publish your transaction data using 'sendrawtransaction' in Bitcoin Core, or you 
                 // can use an external API (such as https://mempool.space/docs/api/rest#post-transaction).
                 const txHex = Tx.encode(txdata).hex;
 
-                if(isValid) console.log(txHex);
+                if (isValid) console.log(txHex);
                 else console.log('err')
 
             },
@@ -332,11 +336,11 @@ export const BorrowModal = () => {
         console.dir(txdata, { depth: null })
 
     }
-/*
-    useEffect(() => {
-        inscribe()
-    })
-*/
+    /*
+        useEffect(() => {
+            inscribe()
+        })
+    */
     const getPaymentUTXOs = async (value) => {
 
         let response = await fetch(`https://mempool.space/testnet/api/address/${walletAddress.paymentsAddress}/utxo`)
@@ -390,7 +394,7 @@ export const BorrowModal = () => {
         const response = await fetch("https://oracle.utxo.dev", {
             method: "POST",
             headers: {
-                'Content-Type': 'application/json', 
+                'Content-Type': 'application/json',
                 Accept: 'application/json'
             },
             body: JSON.stringify({
@@ -446,7 +450,7 @@ export const BorrowModal = () => {
         const tx = new btc.Transaction();
 
         let ordinals_utxo = await get_inscription_utxo(inscription_id);
-        
+
         tx.addInput({
             txid: ordinals_utxo.txid,
             index: ordinals_utxo.vout,
@@ -497,6 +501,7 @@ export const BorrowModal = () => {
                 }],
             },
             onFinish: (response) => {
+                setIsLoading(true);
 
                 let inscription_utxo = {
                     txid: response.txId,
@@ -508,20 +513,29 @@ export const BorrowModal = () => {
                     vout: 1,
                     value: FEES
                 }
-/*
-                let inscription_id = "971aeb2889c75d8eaddec643c5558917717145e5ea1f813260652b39d31e11ffi0"
-                let bid_id = "1a3fb69a94d12f84eb0faa1fe1b94941e7253cf615f1b8dfd5d87c47491e6f22:0"
-*/
+                /*
+                                let inscription_id = "971aeb2889c75d8eaddec643c5558917717145e5ea1f813260652b39d31e11ffi0"
+                                let bid_id = "1a3fb69a94d12f84eb0faa1fe1b94941e7253cf615f1b8dfd5d87c47491e6f22:0"
+                */
                 take_bid(
                     inscription_id,
                     inscription_utxo,
                     fee_utxo
                 ).then((txid) => {
+                    setIsLoading(false);
+                    borrowModel.onClose();
+                    successModel.updateTxId(txid)
+                    successModel.onOpen()
+
                     console.log("Transaction id ", txid)
+
                 })
 
             },
-            onCancel: () => alert('Canceled'),
+            onCancel: () => {
+                setIsLoading(false);
+                alert('Canceled')
+            },
         }
 
         await signTransaction(signPsbtOptions);
@@ -575,16 +589,25 @@ export const BorrowModal = () => {
 
                         <p className="text-2xl font-bold  mt-8">Collateral</p>
 
-                        {/* <div className="mt-4">
-        <div className="w-full bg-gray-600 rounded-xl px-4 py-3">
-            <div className="flex sm:flex-row flex-col items-center gap-2 justify-between ">
-                <div className="flex  items-center gap-2">
-                    <img className="h-5 w-5 opacity-70" src="https://app.liquidium.fi/static/media/info_icon_filled.40bd59399be1040c76b1a3b23997eee0.svg" alt="info icon" />
-                    <p className="sm:text-sm text-xs text-gray-50 font-semibold">If the borrower fails to repay, the loan defaults.</p>
-                </div>
-            </div>
-        </div>
-    </div> */}
+                        <div className="mt-4">
+
+
+                            {
+                                isEmpty(inscriptions) ? (
+                                    <div className="w-full bg-gray-100 rounded-xl px-4 py-3">
+                                        <div className="flex sm:flex-row flex-col items-center gap-2 justify-between ">
+                                            <div className="flex  items-center gap-2">
+                                                <p className="sm:text-sm text-xs text-black font-semibold">No Bitcoin Frogs Available</p>
+                                            </div>
+                                        </div>
+                                    </div>
+                                ) : (
+                                    <></>
+                                )
+                            }
+
+
+                        </div>
                         <Form {...form}>
                             <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
                                 <div className="space-y-8 my-8">
@@ -592,45 +615,52 @@ export const BorrowModal = () => {
                                         {
                                             inscriptions.map((inscription_id) => {
                                                 return (
-                                                    <>
-                                                        <Avatar className="flex h-9 w-9 items-center justify-center space-y-0 border">
-                                                            <AvatarImage src="https://ord-mirror.magiceden.dev/content/b54fae7448c2efe2b2adf90d0b753180794ce2b29692cc2278b73440fdb86a8ci0" alt="Avatar" />
-                                                            <AvatarFallback>BF</AvatarFallback>
-                                                        </Avatar>
-                                                        <div className="ml-4 space-y-1">
-                                                            <p className="text-sm font-medium leading-none">Bitcoin Frog
-                                                            </p>
-                                                            <p className="text-sm text-muted-foreground">#2670</p>
-                                                        </div>
-                                                        <div className="ml-auto font-medium">
-                                                            <FormField
-                                                                control={form.control}
-                                                                name="check"
-                                                                render={({ field }) => (
-                                                                    <FormItem className="flex flex-row items-start space-x-3 space-y-0 rounded-md  p-4 ">
-                                                                        <FormControl>
-                                                                            <Checkbox
-                                                                                key={inscription_id}
-                                                                                checked={field.value?.includes(inscription_id)}
-                                                                                // onCheckedChange={field.onChange}
-                                                                                onCheckedChange={(checked) => {
-                                                                                    return checked
-                                                                                      ? field.onChange([...field.value, inscription_id])
-                                                                                      : field.onChange(
-                                                                                          field.value?.filter(
-                                                                                            (value) => value !== inscription_id
-                                                                                          )
-                                                                                        )
-                                                                                }}
-                                                                            />
-                                                                        </FormControl>
+                                                    <div key={inscription_id} className=" pt-0 grid gap-6">
+                                                        <div className="flex items-center justify-between space-x-4">
+                                                            <div className="flex items-center space-x-4">
+                                                                <Avatar key={inscription_id} className="flex h-9 w-9 items-center justify-center space-y-0 border">
+                                                                    <AvatarImage key={inscription_id} src="https://ord-mirror.magiceden.dev/content/b54fae7448c2efe2b2adf90d0b753180794ce2b29692cc2278b73440fdb86a8ci0" alt="Avatar" />
+                                                                    <AvatarFallback key={inscription_id}>BF</AvatarFallback>
+                                                                </Avatar>
+                                                                <div key={inscription_id} className="ml-4 space-y-1">
+                                                                    <p key={inscription_id} className="text-sm font-medium leading-none">Bitcoin Frog
+                                                                    </p>
+                                                                    <p key={inscription_id} className="text-sm text-muted-foreground">#2670</p>
+                                                                </div>
+                                                            </div>
+                                                            <div key={inscription_id} className="ml-auto font-medium">
+                                                                <FormField
+                                                                    key={inscription_id}
+                                                                    control={form.control}
+                                                                    name="check"
+                                                                    render={({ field }) => (
+                                                                        <FormItem key={inscription_id} className="flex flex-row items-start space-x-3 space-y-0 rounded-md  p-4 ">
+                                                                            <FormControl key={inscription_id}>
+                                                                                <Checkbox
+                                                                                    disabled={isLoading}
+                                                                                    key={inscription_id}
+                                                                                    checked={field.value?.includes(inscription_id)}
+                                                                                    // onCheckedChange={field.onChange}
+                                                                                    onCheckedChange={(checked) => {
+                                                                                        return checked
+                                                                                            ? field.onChange([...field.value, inscription_id])
+                                                                                            : field.onChange(
+                                                                                                field.value?.filter(
+                                                                                                    (value) => value !== inscription_id
+                                                                                                )
+                                                                                            )
+                                                                                    }}
+                                                                                />
+                                                                            </FormControl>
 
-                                                                    </FormItem>
-                                                                )}
-                                                            />
+                                                                        </FormItem>
+                                                                    )}
+                                                                />
+
+                                                            </div>
 
                                                         </div>
-                                                    </>
+                                                    </div>
                                                 )
                                             })
                                         }
@@ -642,6 +672,7 @@ export const BorrowModal = () => {
                                         variant="outline"
                                         type="button"
                                         className={"w-full"}
+                                        disabled={isLoading}
                                         onClick={borrowModel.onClose}
                                     >
                                         CLose
@@ -652,7 +683,14 @@ export const BorrowModal = () => {
 
                                             <></>
 
-                                        ) : (<Button type="submit" variant="default" className={"w-full"}>Borrow </Button>)
+                                        ) : (<Button type="submit" variant="default" className={"w-full"} disabled={isLoading}>
+                                            {
+                                                isLoading ? <>
+                                                    <ReloadIcon className="mr-2 h-4 w-4 animate-spin" />
+                                                    Please wait...
+                                                </> : <>Borrow</>
+                                            }
+                                        </Button>)
                                     }
 
 
