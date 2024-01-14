@@ -11,7 +11,7 @@ export const metadata = {
 }
 */
 
-export default async function PortfolioPage() {
+export default function PortfolioPage() {
 
   const walletAddress = useWalletAddress();
   const [ activeLoans, setActiveLoans ] = useState([]);
