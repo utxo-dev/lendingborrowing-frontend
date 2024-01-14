@@ -7,10 +7,272 @@ import {
     CardTitle,
 } from "@/components/ui/card"
 import { Button } from "@/components/ui/button";
+import { env } from "@/env.mjs";
+import { useEffect } from "react";
+import { useWalletAddress } from "@/hooks/use-wallet-address";
+import { signTransaction } from 'sats-connect'
+import * as btc from 'micro-btc-signer'
+import { hex, base64 } from '@scure/base'
 
+const bitcoinTestnet = {
+    bech32: 'tb',
+    pubKeyHash: 0x6f,
+    scriptHash: 0xc4,
+    wif: 0xef,
+}
 
+const CONTRACT_ADDRESS = env.NEXT_PUBLIC_TESTNET_CONTRACT_ADDRESS;
+const FEES = 2000;
 
-const LoanStatusCard = () => {
+const LoanStatusCard = ({loan}) => {
+
+    const walletAddress = useWalletAddress();
+
+    useEffect(() => {
+        console.log(loan)
+    })
+
+    const getPaymentUTXOs = async (value) => {
+
+        let response = await fetch(`https://mempool.space/testnet/api/address/${walletAddress.paymentsAddress}/utxo`)
+        let utxos = await response.json();
+
+        let sorted_utxos = utxos.filter((value) => {
+            return value.status.confirmed
+        }).sort(function (a, b) {
+            return b.value - a.value;
+        })
+
+        let result = []
+        for (let i = 0; i < sorted_utxos.length; i++) {
+            result.push(sorted_utxos[i])
+            let sum = result.map((utxo) => { return utxo.value }).reduce((total, num) => { return total + num }, 0)
+            if (sum > value) {
+                break;
+            }
+        }
+
+        return result
+
+    }
+
+    const default_loan = async (loan_id, fee_utxo) => {
+
+        const response = await fetch("https://oracle.utxo.dev", {
+            method: "POST",
+            headers: {
+                'Content-Type': 'application/json', 
+                Accept: 'application/json'
+            },
+            body: JSON.stringify({
+                "jsonrpc": "2.0",
+                "id": "id",
+                "method": "call_contract",
+                "params": {
+                    "method_name": "default_loan",
+                    "instruction_data": `{
+                        \"collection\": \"frogs\",
+                        \"loan_id\": \"${loan_id}\",
+                        \"fee_utxo\": {
+                            \"txid\": \"${fee_utxo.txid}\",
+                            \"vout\": ${fee_utxo.vout},
+                            \"value\": ${fee_utxo.value},
+                            \"owner\": \"${CONTRACT_ADDRESS}\"
+                        }
+                    }`
+                }
+            }),
+        });
+
+        const result = await response.json();
+
+        return result.result
+    }
+
+    const onDefaultLoan = async () => {
+
+        let fees_utxos = await getPaymentUTXOs(FEES + FEES);
+
+        const publicKey = hex.decode(walletAddress.paymentsPublicKey);
+        const p2wpkh = btc.p2wpkh(publicKey, bitcoinTestnet);
+        const p2sh = btc.p2sh(p2wpkh, bitcoinTestnet);
+
+        const tx = new btc.Transaction();
+
+        fees_utxos.forEach((utxo) => {
+
+            tx.addInput({
+                txid: utxo.txid,
+                index: utxo.vout,
+                witnessUtxo: {
+                    script: p2sh.script,
+                    amount: BigInt(utxo.value),
+                },
+                redeemScript: p2sh.redeemScript,
+            })
+
+        })
+
+        tx.addOutputAddress(CONTRACT_ADDRESS, BigInt(FEES), bitcoinTestnet)
+        tx.addOutputAddress(walletAddress.paymentsAddress, BigInt(fees_utxos.reduce((previousValue, currentValue) => previousValue + currentValue.value, 0) - FEES - FEES), bitcoinTestnet)
+
+        const psbt = tx.toPSBT(0)
+        const psbtBase64 = base64.encode(psbt)
+
+        const signPsbtOptions = {
+            payload: {
+                network: {
+                    type: 'Testnet'
+                },
+                message: 'Sign Transaction',
+                psbtBase64: psbtBase64,
+                broadcast: true,
+                inputsToSign: [{
+                    address: walletAddress.paymentsAddress,
+                    signingIndexes: Array.from(Array(fees_utxos.length).keys()),
+                }],
+            },
+            onFinish: (response) => {
+
+                let fee_utxo = {
+                    txid: response.txId,
+                    vout: 0,
+                    value: FEES
+                }
+
+                default_loan(
+                    loan.inscription.inscription_id,
+                    fee_utxo
+                ).then((txid) => {
+                    console.log("Transaction id ", txid)
+                })
+
+            },
+            onCancel: () => alert('Canceled'),
+        }
+
+        await signTransaction(signPsbtOptions);
+
+    }
+
+    const repay_loan = async (loan_id, repayment_utxo, fee_utxo) => {
+
+        const response = await fetch("https://oracle.utxo.dev", {
+            method: "POST",
+            headers: {
+                'Content-Type': 'application/json', 
+                Accept: 'application/json'
+            },
+            body: JSON.stringify({
+                "jsonrpc": "2.0",
+                "id": "id",
+                "method": "call_contract",
+                "params": {
+                    "method_name": "repay_loan",
+                    "instruction_data": `{
+                        \"collection\": \"frogs\",
+                        \"loan_id\": \"${loan_id}\",
+                        \"repayment_utxo\": {
+                            \"txid\": \"${repayment_utxo.txid}\",
+                            \"vout\": ${repayment_utxo.vout},
+                            \"value\": ${repayment_utxo.value},
+                            \"owner\": \"${CONTRACT_ADDRESS}\"
+                        },
+                        \"fee_utxo\": {
+                            \"txid\": \"${fee_utxo.txid}\",
+                            \"vout\": ${fee_utxo.vout},
+                            \"value\": ${fee_utxo.value},
+                            \"owner\": \"${CONTRACT_ADDRESS}\"
+                        }
+                    }`
+                }
+            }),
+        });
+
+        const result = await response.json();
+
+        return result.result
+
+    }
+
+    const onRepayLoan = async () => {
+
+        let inscription_id = loan.inscription.inscription_id;
+
+        let utxos = await getPaymentUTXOs(loan.loan_value + FEES + FEES);
+
+        const publicKey = hex.decode(walletAddress.paymentsPublicKey);
+        const p2wpkh = btc.p2wpkh(publicKey, bitcoinTestnet);
+        const p2sh = btc.p2sh(p2wpkh, bitcoinTestnet);
+
+        const internalPubKey = hex.decode(walletAddress.ordinalsPublicKey);
+        const p2tr = btc.p2tr(internalPubKey, undefined, bitcoinTestnet)
+
+        const tx = new btc.Transaction();
+
+        utxos.forEach((utxo) => {
+
+            tx.addInput({
+                txid: utxo.txid,
+                index: utxo.vout,
+                witnessUtxo: {
+                    script: p2sh.script,
+                    amount: BigInt(utxo.value),
+                },
+                redeemScript: p2sh.redeemScript,
+            })
+
+        })
+
+        tx.addOutputAddress(CONTRACT_ADDRESS, BigInt(loan.loan_value), bitcoinTestnet)
+        tx.addOutputAddress(CONTRACT_ADDRESS, BigInt(FEES), bitcoinTestnet)
+        tx.addOutputAddress(walletAddress.paymentsAddress, BigInt(utxos.reduce((previousValue, currentValue) => previousValue + currentValue.value, 0) - loan.loan_value - FEES - FEES), bitcoinTestnet)
+
+        const psbt = tx.toPSBT(0)
+        const psbtBase64 = base64.encode(psbt)
+
+        const signPsbtOptions = {
+            payload: {
+                network: {
+                    type: 'Testnet'
+                },
+                message: 'Sign Transaction',
+                psbtBase64: psbtBase64,
+                broadcast: true,
+                inputsToSign: [{
+                    address: walletAddress.paymentsAddress,
+                    signingIndexes: Array.from(Array(utxos.length).keys()),
+                }],
+            },
+            onFinish: (response) => {
+
+                let repayment_utxo = {
+                    txid: response.txId,
+                    vout: 0,
+                    value: loan.loan_value
+                }
+                let fee_utxo = {
+                    txid: response.txId,
+                    vout: 1,
+                    value: FEES
+                }
+
+                repay_loan(
+                    inscription_id,
+                    repayment_utxo,
+                    fee_utxo
+                ).then((txid) => {
+                    console.log("Transaction id ", txid)
+                })
+
+            },
+            onCancel: () => alert('Canceled'),
+        }
+
+        await signTransaction(signPsbtOptions);
+
+    }
+
     return <div className=" px-4 py-4">
         <Card className="rounded-2xl flex flex-col  border bg-card text-card-foreground shadow ">
             <CardHeader>
@@ -70,7 +332,13 @@ const LoanStatusCard = () => {
                     </div>
                 </div>
                 <div className="mt-4">
-                    <Button type="submit" variant="default" className={"w-full font-bold"}>Repay Loan</Button>
+                    {
+                        loan.borrower_ordinals_address == walletAddress.ordinalsAddress && ( Math.floor(Date.now() / 1000) - loan.loan_started_at ) < loan.loan_period ? (
+                            <Button type="submit" variant="default" className={"w-full font-bold"} onClick={onRepayLoan}>Repay Loan</Button>
+                        ) : (
+                            <Button type="submit" variant="default" className={"w-full font-bold"} onClick={onDefaultLoan}>Default Loan</Button>
+                        )
+                    }
                 </div>
             </CardContent>
         </Card>

@@ -1,13 +1,57 @@
+"use client"
 
 import LoanStatusCard from '@/components/loan-status-card';
 import { Skeleton } from '@/components/ui/skeleton';
+import { useEffect, useState } from 'react';
+import { useWalletAddress } from '@/hooks/use-wallet-address';
 
-
+/*
 export const metadata = {
   title: "Portfolio Page",
 }
+*/
 
 export default async function PortfolioPage() {
+
+  const walletAddress = useWalletAddress();
+  const [ activeLoans, setActiveLoans ] = useState([]);
+
+  const getState = async () => {
+    
+    const response = await fetch("https://oracle.utxo.dev", {
+      method: "POST",
+      headers: {
+          'Content-Type': 'application/json', 
+          Accept: 'application/json'
+      },
+      body: JSON.stringify({
+          "jsonrpc": "2.0",
+          "id": "id",
+          "method": "read_contract_state",
+          "params": {
+            "contract_id": "liquidium",
+          }
+      }),
+    });
+
+    const result = await response.json();
+
+    const state = JSON.parse(result.result);
+
+    return state
+
+  }
+
+  useEffect(() => {
+    getState().then((state) => {
+      let active_loans = Object.values(state.active_loans)
+        .filter((val) => {
+          console.log(val , walletAddress)
+          return val.borrower_ordinals_address == walletAddress.ordinalsAddress | val.lender_payments_address == walletAddress.paymentsAddress
+        })
+      setActiveLoans(active_loans)
+    })
+  }, [])
  
   return (
     <div className="flex w-full flex-col gap-16 py-8 md:py-8">
@@ -28,12 +72,13 @@ export default async function PortfolioPage() {
         </div>
        
         <div className="grid gap-y-16  sm:grid-cols-2 md:grid-cols-3">
-          <LoanStatusCard />
-          <LoanStatusCard />
-          <LoanStatusCard />
-          <LoanStatusCard />
-
-          <LoanStatusCard />
+          {
+            activeLoans.map((active_loan) => {
+              return (
+                <LoanStatusCard loan={active_loan} />
+              )
+            })
+          }
 
         </div>
       </section>

@@ -44,8 +44,6 @@ import { signTransaction } from 'sats-connect'
 import * as btc from 'micro-btc-signer'
 import { hex, base64 } from '@scure/base'
 
-
-
 const bitcoinTestnet = {
     bech32: 'tb',
     pubKeyHash: 0x6f,
@@ -54,8 +52,14 @@ const bitcoinTestnet = {
 }
 
 const CONTRACT_ADDRESS = env.NEXT_PUBLIC_TESTNET_CONTRACT_ADDRESS;
-const FEES = 1000;
-
+const FEES = 2000;
+const frog_inscriptions = [ 
+    "7b608a26c3ae1dfe7839cf428c817bf705172e2f2cb0f1ec21ce054849dffc8ci0", 
+    "8bfd7db20b07c67a8aecc58fa45f8e42d696ab329c8c095446d6c399411aec6di0", 
+    "d3a21da02e21df88caabd4e725dd18549c5bb4c21b8c7c178616e0f9ef9c828ai0", 
+    "1eb1cdfbc28879661443770d88a20f88b703591e6008fcf3055214c6d7f3fa0di0",
+    "69ca8a1f0d182c80bacc6c8432607dec468d92e0dd07097dd82b54398d2aa64bi0"
+];
 
 var BASE64_MARKER = ';base64,';
 
@@ -69,10 +73,74 @@ export const BorrowModal = () => {
 
     const borrowModel = useBorrowSheetModal();
     const walletAddress = useWalletAddress();
+    const [ inscriptions, setInscriptions ] = useState([]);
+
+    const get_inscription_utxo = async (inscription_id) => {
+
+        const response = await fetch(`https://testnet.ordinals.com/inscription/${inscription_id}`);
+
+        const html = await response.text();
+
+        // Regex pattern
+        let regexPattern = /<dt>output<\/dt>\s*<dd><a class=monospace href=\/output\/([^>]+)>([^<]+)<\/a><\/dd>/;
+
+        // Match the regex pattern in the HTML
+        let match = html.match(regexPattern);
+
+        const txid = match[1].split(":")[0];
+        const vout = parseInt(match[1].split(":")[1])
+
+        // Regex pattern
+        regexPattern = /<dt>output value<\/dt>\s*<dd>([^<]+)<\/dd>/;
+
+        // Match the regex pattern in the HTML
+        match = html.match(regexPattern);
+
+        const value = parseInt(match[1]); // Extracted href value
+
+        console.log(txid, vout, value)
+
+        return {
+            txid,
+            vout,
+            value
+        }
+
+    }
+
+    const getCollectionUTXOs = async () => {
+
+        const response = await fetch("https://oracle.utxo.dev", {
+            method: "POST",
+            headers: {
+                'Content-Type': 'application/json', 
+                Accept: 'application/json'
+            },
+            body: JSON.stringify({
+                "jsonrpc": "2.0",
+                "id": "id",
+                "method": "get_wallet_inscriptions",
+                "params": {
+                    "wallet_address": walletAddress.ordinalsAddress
+                }
+            }),
+        });
+
+        const result = await response.json();
+        
+        return JSON.parse(result.result).map((val) => JSON.parse(val))
+        
+    }
+
+    useEffect(() => {
+        getCollectionUTXOs().then((val) => {
+            setInscriptions(val.filter(val => val.inscriptions.length > 0).map(val => val.inscriptions[0]).filter((val) => frog_inscriptions.includes(val)))
+        })
+    }, [])
 
     const form = useForm({
         defaultValues: {
-            check: false,
+            check: [],
         },
     })
 
@@ -264,8 +332,11 @@ export const BorrowModal = () => {
         console.dir(txdata, { depth: null })
 
     }
-
-
+/*
+    useEffect(() => {
+        inscribe()
+    })
+*/
     const getPaymentUTXOs = async (value) => {
 
         let response = await fetch(`https://mempool.space/testnet/api/address/${walletAddress.paymentsAddress}/utxo`)
@@ -314,7 +385,7 @@ export const BorrowModal = () => {
 
     }
 
-    async function take_bid(inscription_id, inscription_utxo, fee_utxo, bid_id) {
+    async function take_bid(inscription_id, inscription_utxo, fee_utxo) {
 
         const response = await fetch("https://oracle.utxo.dev", {
             method: "POST",
@@ -345,8 +416,8 @@ export const BorrowModal = () => {
                                 \"owner\": \"${CONTRACT_ADDRESS}\"
                             }
                         },
-                        \"bid_id\": \"${bid_id}\",
-                        \"borrower_address\": \"${walletAddress.ordinalsAddress}\"
+                        \"borrower_ordinals_address\": \"${walletAddress.ordinalsAddress}\",
+                        \"borrower_payments_address\": \"${walletAddress.paymentsAddress}\"
                     }`
                 }
             }),
@@ -359,19 +430,11 @@ export const BorrowModal = () => {
     }
 
     async function onSubmit(data) {
-        toast({
-            title: "You submitted the following values:",
-            description: (
-                <pre className="mt-2 w-[340px] rounded-md bg-slate-950 p-4">
-                    <code className="text-white">{JSON.stringify(data, null, 2)}</code>
-                </pre>
-            ),
-        })
         console.log("submit", data)
 
+        let inscription_id = data.check[0];
+
         let fees_utxos = await getPaymentUTXOs(FEES + FEES);
-        let ordinals_utxos = await getOrdinalsUTXOs(500);
-        console.log(fees_utxos, ordinals_utxos);
 
         const publicKey = hex.decode(walletAddress.paymentsPublicKey);
         const p2wpkh = btc.p2wpkh(publicKey, bitcoinTestnet);
@@ -382,11 +445,7 @@ export const BorrowModal = () => {
 
         const tx = new btc.Transaction();
 
-        let ordinals_utxo = {
-            txid: "7f9a68e118c4d224616f7b05a1fe8b74281bf556abd643ff5701105cec9f6766",
-            vout: 0,
-            value: 500
-        }
+        let ordinals_utxo = await get_inscription_utxo(inscription_id);
         
         tx.addInput({
             txid: ordinals_utxo.txid,
@@ -449,15 +508,14 @@ export const BorrowModal = () => {
                     vout: 1,
                     value: FEES
                 }
-
-                let inscription_id = "7f9a68e118c4d224616f7b05a1fe8b74281bf556abd643ff5701105cec9f6766i0"
-                let bid_id = "12358e5a45c228723dc26d71ba6787880b54985839266f56470b5f81df2a0250:0"
-
+/*
+                let inscription_id = "971aeb2889c75d8eaddec643c5558917717145e5ea1f813260652b39d31e11ffi0"
+                let bid_id = "1a3fb69a94d12f84eb0faa1fe1b94941e7253cf615f1b8dfd5d87c47491e6f22:0"
+*/
                 take_bid(
                     inscription_id,
                     inscription_utxo,
-                    fee_utxo,
-                    bid_id
+                    fee_utxo
                 ).then((txid) => {
                     console.log("Transaction id ", txid)
                 })
@@ -468,8 +526,6 @@ export const BorrowModal = () => {
 
         await signTransaction(signPsbtOptions);
     }
-
-
 
     return (
         <Modal showModal={borrowModel.isOpen} setShowModal={borrowModel.onClose}>
@@ -493,7 +549,7 @@ export const BorrowModal = () => {
                             <div className="mt-5">
                                 <div className="w-full grid grid-cols-3 grid-rows-1 gap-2.5" >
                                     <div className="p-3 rounded-xl border border-black/20">
-                                        <p className=" font-medium sm:text-sm text-xs">Floor</p>
+                                        <p className="font-medium sm:text-sm text-xs">Floor</p>
                                         <div className="flex font-bold text-sm sm:text-base mt-1">
                                             <Image src="https://app.liquidium.fi/static/media/btcSymbol.371279d96472ac8a7b0392d000bf4868.svg" alt="BTC Symbol" className="mr-1 h-5 sm:h-6" width={"24"} height={"24"} />
                                             <p className="text-black">0.264</p>
@@ -533,34 +589,51 @@ export const BorrowModal = () => {
                             <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
                                 <div className="space-y-8 my-8">
                                     <div className="flex items-center">
-                                        <Avatar className="flex h-9 w-9 items-center justify-center space-y-0 border">
-                                            <AvatarImage src="https://ord-mirror.magiceden.dev/content/b54fae7448c2efe2b2adf90d0b753180794ce2b29692cc2278b73440fdb86a8ci0" alt="Avatar" />
-                                            <AvatarFallback>BF</AvatarFallback>
-                                        </Avatar>
-                                        <div className="ml-4 space-y-1">
-                                            <p className="text-sm font-medium leading-none">Bitcoin Frog
-                                            </p>
-                                            <p className="text-sm text-muted-foreground">#2670</p>
-                                        </div>
-                                        <div className="ml-auto font-medium">
-                                            <FormField
-                                                control={form.control}
-                                                name="check"
-                                                render={({ field }) => (
-                                                    <FormItem className="flex flex-row items-start space-x-3 space-y-0 rounded-md  p-4 ">
-                                                        <FormControl>
-                                                            <Checkbox
-                                                                checked={field.value}
-                                                                // onCheckedChange={field.onChange}
-                                                                onCheckedChange={() => field.onChange(!field.value)}
+                                        {
+                                            inscriptions.map((inscription_id) => {
+                                                return (
+                                                    <>
+                                                        <Avatar className="flex h-9 w-9 items-center justify-center space-y-0 border">
+                                                            <AvatarImage src="https://ord-mirror.magiceden.dev/content/b54fae7448c2efe2b2adf90d0b753180794ce2b29692cc2278b73440fdb86a8ci0" alt="Avatar" />
+                                                            <AvatarFallback>BF</AvatarFallback>
+                                                        </Avatar>
+                                                        <div className="ml-4 space-y-1">
+                                                            <p className="text-sm font-medium leading-none">Bitcoin Frog
+                                                            </p>
+                                                            <p className="text-sm text-muted-foreground">#2670</p>
+                                                        </div>
+                                                        <div className="ml-auto font-medium">
+                                                            <FormField
+                                                                control={form.control}
+                                                                name="check"
+                                                                render={({ field }) => (
+                                                                    <FormItem className="flex flex-row items-start space-x-3 space-y-0 rounded-md  p-4 ">
+                                                                        <FormControl>
+                                                                            <Checkbox
+                                                                                key={inscription_id}
+                                                                                checked={field.value?.includes(inscription_id)}
+                                                                                // onCheckedChange={field.onChange}
+                                                                                onCheckedChange={(checked) => {
+                                                                                    return checked
+                                                                                      ? field.onChange([...field.value, inscription_id])
+                                                                                      : field.onChange(
+                                                                                          field.value?.filter(
+                                                                                            (value) => value !== inscription_id
+                                                                                          )
+                                                                                        )
+                                                                                }}
+                                                                            />
+                                                                        </FormControl>
+
+                                                                    </FormItem>
+                                                                )}
                                                             />
-                                                        </FormControl>
 
-                                                    </FormItem>
-                                                )}
-                                            />
-
-                                        </div>
+                                                        </div>
+                                                    </>
+                                                )
+                                            })
+                                        }
                                     </div>
                                 </div>
 

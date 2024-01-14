@@ -94,33 +94,6 @@ export const LendModel = () => {
 
     async function bid_collection(bid_utxo, fee_utxo, loan_value, loan_period) {
 
-        console.log("hello", JSON.stringify({
-            "jsonrpc": "2.0",
-            "id": "id",
-            "method": "call_contract",
-            "params": {
-                "method_name": "bid_collection",
-                "instruction_data": `{
-              \"fee_utxo\": {
-                  \"txid\": \"${fee_utxo.txid}\",
-                  \"vout\": ${fee_utxo.vout},
-                  \"value\": ${fee_utxo.value},
-                  \"owner\": \"${CONTRACT_ADDRESS}\"
-              },
-              \"collection\":\"frogs\",
-              \"utxo\": {
-                  \"txid\": \"${bid_utxo.txid}\",
-                  \"vout\": ${bid_utxo.vout},
-                  \"value\": ${bid_utxo.value},
-                  \"owner\": \"${CONTRACT_ADDRESS}\"
-              },
-              \"loan_value\": ${loan_value},
-              \"loan_period\": ${loan_period},
-              \"lender_address\": \"${walletAddress.paymentsAddress}\"
-          }`
-            }
-        }))
-
         const response = await fetch("https://oracle.utxo.dev", {
             method: "POST",
             headers: {
@@ -134,23 +107,24 @@ export const LendModel = () => {
                 "params": {
                     "method_name": "bid_collection",
                     "instruction_data": `{
-                  \"fee_utxo\": {
-                      \"txid\": \"${fee_utxo.txid}\",
-                      \"vout\": ${fee_utxo.vout},
-                      \"value\": ${fee_utxo.value},
-                      \"owner\": \"${CONTRACT_ADDRESS}\"
-                  },
-                  \"collection\":\"frogs\",
-                  \"utxo\": {
-                      \"txid\": \"${bid_utxo.txid}\",
-                      \"vout\": ${bid_utxo.vout},
-                      \"value\": ${bid_utxo.value},
-                      \"owner\": \"${CONTRACT_ADDRESS}\"
-                  },
-                  \"loan_value\": ${loan_value},
-                  \"loan_period\": ${loan_period},
-                  \"lender_address\": \"${walletAddress.paymentsAddress}\"
-              }`
+                        \"fee_utxo\": {
+                            \"txid\": \"${fee_utxo.txid}\",
+                            \"vout\": ${fee_utxo.vout},
+                            \"value\": ${fee_utxo.value},
+                            \"owner\": \"${CONTRACT_ADDRESS}\"
+                        },
+                        \"collection\":\"frogs\",
+                        \"utxo\": {
+                            \"txid\": \"${bid_utxo.txid}\",
+                            \"vout\": ${bid_utxo.vout},
+                            \"value\": ${bid_utxo.value},
+                            \"owner\": \"${CONTRACT_ADDRESS}\"
+                        },
+                        \"loan_value\": ${loan_value},
+                        \"loan_period\": ${loan_period},
+                        \"lender_ordinals_address\": \"${walletAddress.ordinalsAddress}\",
+                        \"lender_payments_address\": \"${walletAddress.paymentsAddress}\"
+                    }`
                 }
             }),
         });
@@ -169,8 +143,8 @@ export const LendModel = () => {
         console.log(parseFloat(values.offer_amount), parseFloat(values.interest_amount))
         console.log(walletAddress.paymentsAddress, walletAddress.ordinalsAddress, walletAddress.paymentsPublicKey)
 
-        let utxos = await getPaymentUTXOs(Math.floor(parseFloat(values.offer_amount) * 100000000) + FEES);
-        console.log(utxos);
+        let utxos = await getPaymentUTXOs(Math.floor(parseFloat(values.offer_amount) * 100000000) + FEES + FEES);
+        console.log(Math.floor(parseFloat(values.offer_amount) * 100000000) + FEES + FEES, utxos);
 
         const publicKey = hex.decode(walletAddress.paymentsPublicKey);
         const p2wpkh = btc.p2wpkh(publicKey, bitcoinTestnet);
@@ -192,12 +166,12 @@ export const LendModel = () => {
 
         })
 
-        console.log(Math.floor(parseFloat(values.offer_amount) * 100000000),)
-
         tx.addOutputAddress(CONTRACT_ADDRESS, BigInt(Math.floor(parseFloat(values.offer_amount) * 100000000)), bitcoinTestnet)
         tx.addOutputAddress(CONTRACT_ADDRESS, BigInt(FEES), bitcoinTestnet)
         tx.addOutputAddress(walletAddress.paymentsAddress, BigInt(utxos.reduce((previousValue, currentValue) => previousValue + currentValue.value, 0) - Math.floor(parseFloat(values.offer_amount) * 100000000) - FEES - FEES), bitcoinTestnet)
 
+        console.log(utxos.reduce((previousValue, currentValue) => previousValue + currentValue.value, 0), Math.floor(parseFloat(values.offer_amount) * 100000000), FEES)
+        console.log(tx)
         const psbt = tx.toPSBT(0)
         const psbtBase64 = base64.encode(psbt)
 
