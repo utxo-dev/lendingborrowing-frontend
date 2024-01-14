@@ -10,6 +10,7 @@ import { Button } from "@/components/ui/button";
 import { env } from "@/env.mjs";
 import { useEffect } from "react";
 import { useWalletAddress } from "@/hooks/use-wallet-address";
+import { useSuccessModal } from "@/hooks/use-success-model";
 import { signTransaction } from 'sats-connect'
 import * as btc from 'micro-btc-signer'
 import { hex, base64 } from '@scure/base'
@@ -27,6 +28,8 @@ const FEES = 2000;
 const LoanStatusCard = ({loan}) => {
 
     const walletAddress = useWalletAddress();
+    const successModel = useSuccessModal();
+    const [isLoading, setIsLoading] = useState();
 
     useEffect(() => {
         console.log(loan)

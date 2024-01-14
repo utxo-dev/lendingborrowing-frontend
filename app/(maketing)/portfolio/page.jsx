@@ -4,6 +4,8 @@ import LoanStatusCard from '@/components/loan-status-card';
 import { Skeleton } from '@/components/ui/skeleton';
 import { useEffect, useState } from 'react';
 import { useWalletAddress } from '@/hooks/use-wallet-address';
+import EmptyState from "@/components/empty-state"
+import { isEmpty } from '@/lib/utils';
 
 /*
 export const metadata = {
@@ -70,8 +72,8 @@ export default function PortfolioPage() {
           system. */}
         </p>
         </div>
-       
-        <div className="grid gap-y-16  sm:grid-cols-2 md:grid-cols-3">
+        {
+          isEmpty(activeLoans)  ?<EmptyState/>  : <div className="grid gap-y-16  sm:grid-cols-2 md:grid-cols-3">
           {
             activeLoans.map((active_loan) => {
               return (
@@ -81,6 +83,9 @@ export default function PortfolioPage() {
           }
 
         </div>
+        }
+       
+        
       </section>
     </div>
   )

@@ -4,6 +4,7 @@ import { WalletModal } from "@/components/layout/wallet-connect-model";
 import { useMounted } from "@/hooks/use-mounted";
 import { LendModel } from "@/components/models/lend-model"
 import { BorrowModal } from "@/components/models/borrow-model"
+import { SuccessModel } from "@/components/models/success-model"
 
 
 export const ModalProvider = () => {
@@ -19,6 +20,7 @@ export const ModalProvider = () => {
       <WalletModal />
       <LendModel />
       <BorrowModal />
+      <SuccessModel />
       {/* add your own modals here... */}
     </>
   );
