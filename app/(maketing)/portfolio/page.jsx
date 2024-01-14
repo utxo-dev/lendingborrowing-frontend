@@ -7,7 +7,7 @@ export const metadata = {
 }
 */
 
-export default function PortfolioPage() {
+export default async function PortfolioPage() {
 
   const state = await getState();
   return (
