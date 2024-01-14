@@ -31,8 +31,6 @@ const BorrowCard = () => {
                             </div>
                         </div>
                     </div>
-                </CardTitle>
-                <CardDescription>
                     <div className="mt-5">
                         <div className="w-full grid grid-cols-3 grid-rows-1 gap-2.5" >
                             <div className="p-3 rounded-xl border border-black/20">
@@ -58,7 +56,8 @@ const BorrowCard = () => {
                             </div>
                         </div>
                     </div>
-                </CardDescription>
+                </CardTitle>
+                
             </CardHeader>
             <CardContent>
                 {/* <p className="text-2xl font-bold  mt-8">Loan Amount</p>

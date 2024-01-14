@@ -97,7 +97,8 @@ export const LendModel = () => {
         const response = await fetch("https://oracle.utxo.dev", {
             method: "POST",
             headers: {
-                "Content-Type": "application/json",
+                'Content-Type': 'application/json', 
+                Accept: 'application/json'
             },
             body: JSON.stringify({
                 "jsonrpc": "2.0",
@@ -106,23 +107,24 @@ export const LendModel = () => {
                 "params": {
                     "method_name": "bid_collection",
                     "instruction_data": `{
-                  \"fee_utxo\": {
-                      \"txid\": \"${fee_utxo.txid}\",
-                      \"vout\": ${fee_utxo.vout},
-                      \"value\": ${fee_utxo.value},
-                      \"owner\": \"${CONTRACT_ADDRESS}\"
-                  },
-                  \"collection\":\"frogs\",
-                  \"utxo\": {
-                      \"txid\": \"${bid_utxo.txid}\",
-                      \"vout\": ${bid_utxo.vout},
-                      \"value\": ${bid_utxo.value},
-                      \"owner\": \"${CONTRACT_ADDRESS}\"
-                  },
-                  \"loan_value\": ${loan_value},
-                  \"loan_period\": ${loan_period},
-                  \"lender_address\": \"${paymentsAddress}\"
-              }`
+                        \"fee_utxo\": {
+                            \"txid\": \"${fee_utxo.txid}\",
+                            \"vout\": ${fee_utxo.vout},
+                            \"value\": ${fee_utxo.value},
+                            \"owner\": \"${CONTRACT_ADDRESS}\"
+                        },
+                        \"collection\":\"frogs\",
+                        \"utxo\": {
+                            \"txid\": \"${bid_utxo.txid}\",
+                            \"vout\": ${bid_utxo.vout},
+                            \"value\": ${bid_utxo.value},
+                            \"owner\": \"${CONTRACT_ADDRESS}\"
+                        },
+                        \"loan_value\": ${loan_value},
+                        \"loan_period\": ${loan_period},
+                        \"lender_ordinals_address\": \"${walletAddress.ordinalsAddress}\",
+                        \"lender_payments_address\": \"${walletAddress.paymentsAddress}\"
+                    }`
                 }
             }),
         });
@@ -141,8 +143,8 @@ export const LendModel = () => {
         console.log(parseFloat(values.offer_amount), parseFloat(values.interest_amount))
         console.log(walletAddress.paymentsAddress, walletAddress.ordinalsAddress, walletAddress.paymentsPublicKey)
 
-        let utxos = await getPaymentUTXOs(Math.floor(parseFloat(values.offer_amount) * 100000000) + FEES);
-        console.log(utxos);
+        let utxos = await getPaymentUTXOs(Math.floor(parseFloat(values.offer_amount) * 100000000) + FEES + FEES);
+        console.log(Math.floor(parseFloat(values.offer_amount) * 100000000) + FEES + FEES, utxos);
 
         const publicKey = hex.decode(walletAddress.paymentsPublicKey);
         const p2wpkh = btc.p2wpkh(publicKey, bitcoinTestnet);
@@ -164,12 +166,12 @@ export const LendModel = () => {
 
         })
 
-        console.log(Math.floor(parseFloat(values.offer_amount) * 100000000),)
-
         tx.addOutputAddress(CONTRACT_ADDRESS, BigInt(Math.floor(parseFloat(values.offer_amount) * 100000000)), bitcoinTestnet)
         tx.addOutputAddress(CONTRACT_ADDRESS, BigInt(FEES), bitcoinTestnet)
         tx.addOutputAddress(walletAddress.paymentsAddress, BigInt(utxos.reduce((previousValue, currentValue) => previousValue + currentValue.value, 0) - Math.floor(parseFloat(values.offer_amount) * 100000000) - FEES - FEES), bitcoinTestnet)
 
+        console.log(utxos.reduce((previousValue, currentValue) => previousValue + currentValue.value, 0), Math.floor(parseFloat(values.offer_amount) * 100000000), FEES)
+        console.log(tx)
         const psbt = tx.toPSBT(0)
         const psbtBase64 = base64.encode(psbt)
 
@@ -239,8 +241,7 @@ export const LendModel = () => {
                                     </div>
                                 </div>
                             </div>
-                        </CardTitle>
-                        <CardDescription>
+
                             <div className="mt-5">
                                 <div className="w-full grid grid-cols-3 grid-rows-1 gap-2.5" >
                                     <div className="p-3 rounded-xl border border-black/20">
@@ -266,7 +267,8 @@ export const LendModel = () => {
                                     </div>
                                 </div>
                             </div>
-                        </CardDescription>
+                        </CardTitle>
+                        
                     </CardHeader>
                     <CardContent>
 
@@ -297,14 +299,14 @@ export const LendModel = () => {
                                                     <FormControl>
                                                         <Input type="number" placeholder={0.00} {...field} />
                                                     </FormControl>
-                                                    <FormDescription>
-                                                        <div className="flex flex-row justify-between">
-                                                            <div className="flex flex-row">Best:
-                                                                <img src="https://app.liquidium.fi/static/media/btcSymbol.371279d96472ac8a7b0392d000bf4868.svg" className="mx-2" /> 0.1752</div>
+                                                    <FormDescription className="flex flex-row justify-between">
+                                                       
+                                                            <p className="flex flex-row">Best:
+                                                                <img src="https://app.liquidium.fi/static/media/btcSymbol.371279d96472ac8a7b0392d000bf4868.svg" className="mx-2" /> 0.1752</p>
 
-                                                            <div>$7913.67 USD</div>
+                                                            <p>$7913.67 USD</p>
 
-                                                        </div>
+                                                        
                                                     </FormDescription>
                                                     <FormMessage />
                                                 </FormItem>
@@ -319,8 +321,8 @@ export const LendModel = () => {
                                                     <FormControl>
                                                         <Input type="number" placeholder={0.00} {...field} />
                                                     </FormControl>
-                                                    <FormDescription>
-                                                        <div className="flex">   <img src="https://app.liquidium.fi/static/media/btcSymbol.371279d96472ac8a7b0392d000bf4868.svg" className="mr-2"  />  $180.36 USD</div>
+                                                    <FormDescription className="flex">
+                                                          <img src="https://app.liquidium.fi/static/media/btcSymbol.371279d96472ac8a7b0392d000bf4868.svg" className="mr-2"  />  <span>$180.36 USD</span>
                                                     </FormDescription>
                                                     <FormMessage />
                                                 </FormItem>

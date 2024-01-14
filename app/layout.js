@@ -63,7 +63,7 @@ export const metadata = {
 export default function RootLayout({ children }) {
 
   return (
-    <html lang="en" suppressHydrationWarning>
+    <html lang="en" suppressHydrationWarning={true}>
       <head />
       <body
         className={cn(
@@ -73,7 +73,7 @@ export default function RootLayout({ children }) {
           fontHeading.variable
         )}
       >
-          <NextTopLoader />
+          <NextTopLoader color="#FDA629" />
         <ThemeProvider attribute="class" defaultTheme="system" enableSystem disableTransitionOnChange>
 
           {children}

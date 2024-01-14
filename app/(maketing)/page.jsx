@@ -73,7 +73,7 @@ export default async function IndexPage() {
                 target="_blank"
                 key={feature.title}
                 href={feature.href}
-                ariaLabel={feature.title}
+                aria-label={feature.title}
                 className="flex flex-col items-center transition duration-300 hover:text-black dark:hover:text-white"
               >
                 {feature.icon}
