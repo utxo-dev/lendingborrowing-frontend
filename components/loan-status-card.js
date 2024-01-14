@@ -33,10 +33,6 @@ const LoanStatusCard = ({loan}) => {
     const successModel = useSuccessModal();
     const [isLoading, setIsLoading] = useState();
 
-    useEffect(() => {
-        console.log(loan)
-    })
-
     const getPaymentUTXOs = async (value) => {
 
         let response = await fetch(`https://mempool.space/testnet/api/address/${walletAddress.paymentsAddress}/utxo`)
