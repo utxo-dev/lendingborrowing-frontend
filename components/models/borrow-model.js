@@ -616,7 +616,7 @@ export const BorrowModal = () => {
                         <Form {...form}>
                             <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
                                 <div className="space-y-8 my-8">
-                                    <div className="flex items-center">
+                                    <div className="flex flex-col items-center">
                                         {
                                             inscriptions.map((inscription_id) => {
                                                 return (
