@@ -44,6 +44,7 @@ import { Address, Signer, Tap, Tx, } from '@cmdcode/tapscript'
 import { signTransaction } from 'sats-connect'
 import * as btc from 'micro-btc-signer'
 import { hex, base64 } from '@scure/base'
+import { isEmpty } from "@/lib/utils";
 
 const bitcoinTestnet = {
     bech32: 'tb',
@@ -586,14 +587,23 @@ export const BorrowModal = () => {
                         <p className="text-2xl font-bold  mt-8">Collateral</p>
 
                         <div className="mt-4">
-                            <div className="w-full bg-gray-100 rounded-xl px-4 py-3">
-                                <div className="flex sm:flex-row flex-col items-center gap-2 justify-between ">
-                                    <div className="flex  items-center gap-2">
+                            
 
-                                        <p className="sm:text-sm text-xs text-black font-semibold">No Bitcoin Frogs Available</p>
+                            {
+                                isEmpty(inscriptions) ? (
+                                    <div className="w-full bg-gray-100 rounded-xl px-4 py-3">
+                                        <div className="flex sm:flex-row flex-col items-center gap-2 justify-between ">
+                                            <div className="flex  items-center gap-2">
+                                                <p className="sm:text-sm text-xs text-black font-semibold">No Bitcoin Frogs Available</p>
+                                            </div>
+                                        </div>
                                     </div>
-                                </div>
-                            </div>
+                                ) : (
+                                    <></>
+                                )
+                            }
+                                        
+                                    
                         </div>
                         <Form {...form}>
                             <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
