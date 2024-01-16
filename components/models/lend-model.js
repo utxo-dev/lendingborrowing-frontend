@@ -148,7 +148,7 @@ export const LendModel = () => {
         console.log(values)
         const paymentValueInSats = await getWalletBalance({ address: walletAddress.paymentsAddress });
         
-        const satsBtcValue = parseFloat((paymentValueInSats / 100000000).toFixed(8))
+        const satsBtcValue = Math.floor(parseFloat(((paymentValueInSats + FEES + FEES)   / 100000000).toFixed(8)))
       
         if(parseFloat(values.offer_amount) > satsBtcValue){
             toast({
