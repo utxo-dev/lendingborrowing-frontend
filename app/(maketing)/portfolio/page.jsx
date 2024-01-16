@@ -1,5 +1,6 @@
 
 import PortfolioComponent from "@/components/portfolio-component"
+import { throws } from "assert";
 
 /*
 export const metadata = {
@@ -11,12 +12,14 @@ export default async function PortfolioPage() {
 
   const state = await getState();
   return (
-    <div className="flex w-full flex-col gap-16 py-8 md:py-8">
+    <section className="container">
+      <div className="flex w-full flex-col gap-16 py-8 md:py-8">
     
 
-      <PortfolioComponent state={state} />
-     
-    </div>
+    <PortfolioComponent state={state} />
+   
+  </div>
+    </section>
   )
 }
 
@@ -38,6 +41,9 @@ export default async function PortfolioPage() {
     });
 
     const result = await response.json();
+
+    console.log(result)
+  
 
     const state = JSON.parse(result.result);
 

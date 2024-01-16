@@ -16,7 +16,7 @@ import {
     FormLabel,
     FormMessage,
 } from "@/components/ui/form"
-
+import { ToastAction } from "@/components/ui/toast"
 
 import {
     Card,
@@ -37,8 +37,11 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
 import * as z from "zod";
 import { env } from "@/env.mjs";
+import { useToast } from "@/components/ui/use-toast"
 
-import { useToast } from "@/components/ui/use-toast";
+
+
+import getWalletBalance from "@/lib/wallet-balance"
 
 const CONTRACT_ADDRESS = env.NEXT_PUBLIC_TESTNET_CONTRACT_ADDRESS;
 const FEES = 1000;
@@ -62,6 +65,7 @@ export const LendModel = () => {
     const lendModel = useLendSheetModal();
     const walletAddress = useWalletAddress();
     const successModel = useSuccessModal();
+    const { toast } = useToast()
     const [isLoading, setIsLoading] = useState();
 
     const form = useForm({
@@ -100,7 +104,7 @@ export const LendModel = () => {
         const response = await fetch("https://oracle.utxo.dev", {
             method: "POST",
             headers: {
-                'Content-Type': 'application/json', 
+                'Content-Type': 'application/json',
                 Accept: 'application/json'
             },
             body: JSON.stringify({
@@ -142,11 +146,23 @@ export const LendModel = () => {
         // Do something with the form values.
         // ✅ This will be type-safe and validated.
         console.log(values)
+        const paymentValueInSats = await getWalletBalance({ address: walletAddress.paymentsAddress });
+        
+        const satsBtcValue = parseFloat((paymentValueInSats / 100000000).toFixed(8))
+      
+        if(parseFloat(values.offer_amount) > satsBtcValue){
+            toast({
+                title: "You don’t have enough BTC to lend this amount",
+                action:  <ToastAction altText="OK">OK</ToastAction>
+              });
+              return ;
+        }
 
         console.log(parseFloat(values.offer_amount), parseFloat(values.interest_amount))
         console.log(walletAddress.paymentsAddress, walletAddress.ordinalsAddress, walletAddress.paymentsPublicKey)
 
         let utxos = await getPaymentUTXOs(Math.floor(parseFloat(values.offer_amount) * 100000000) + FEES + FEES);
+        console.log("transaction goes through...")
         console.log(Math.floor(parseFloat(values.offer_amount) * 100000000) + FEES + FEES, utxos);
 
         const publicKey = hex.decode(walletAddress.paymentsPublicKey);
@@ -214,7 +230,7 @@ export const LendModel = () => {
                     lendModel.onClose();
                     successModel.updateTxId(txid);
                     successModel.onOpen();
-                    
+
                     console.log("Transaction id ", txid)
                 })
 
@@ -279,7 +295,7 @@ export const LendModel = () => {
                                 </div>
                             </div>
                         </CardTitle>
-                        
+
                     </CardHeader>
                     <CardContent>
 
@@ -311,13 +327,13 @@ export const LendModel = () => {
                                                         <Input type="number" disabled={isLoading} placeholder={0.00} {...field} />
                                                     </FormControl>
                                                     <FormDescription className="flex flex-row justify-between">
-                                                       
-                                                            <p className="flex flex-row">Best:
-                                                                <img src="https://app.liquidium.fi/static/media/btcSymbol.371279d96472ac8a7b0392d000bf4868.svg" className="mx-2" /> 0.1752</p>
 
-                                                            <p>$7913.67 USD</p>
+                                                        <p className="flex flex-row">Best:
+                                                            <img src="https://app.liquidium.fi/static/media/btcSymbol.371279d96472ac8a7b0392d000bf4868.svg" className="mx-2" /> 0.1752</p>
 
-                                                        
+                                                        <p>$7913.67 USD</p>
+
+
                                                     </FormDescription>
                                                     <FormMessage />
                                                 </FormItem>
@@ -333,7 +349,7 @@ export const LendModel = () => {
                                                         <Input type="number" disabled={isLoading} placeholder={0.00} {...field} />
                                                     </FormControl>
                                                     <FormDescription className="flex">
-                                                          <img src="https://app.liquidium.fi/static/media/btcSymbol.371279d96472ac8a7b0392d000bf4868.svg" className="mr-2"  />  <span>$180.36 USD</span>
+                                                        <img src="https://app.liquidium.fi/static/media/btcSymbol.371279d96472ac8a7b0392d000bf4868.svg" className="mr-2" />  <span>$180.36 USD</span>
                                                     </FormDescription>
                                                     <FormMessage />
                                                 </FormItem>
@@ -347,7 +363,7 @@ export const LendModel = () => {
                                             type="button"
                                             onClick={lendModel.onClose}
                                         >
-                                            CLose
+                                            Close
                                         </Button>
 
                                         {
@@ -357,13 +373,13 @@ export const LendModel = () => {
 
                                             ) : (
                                                 <Button type="submit" variant="default" disabled={isLoading} className={"w-full"}>
-                                           {
-                                            isLoading ? <>
-                                                    <ReloadIcon className="mr-2 h-4 w-4 animate-spin" />
-                                                    Please wait...
-                                                </> : <>OFFER</>
-                                           }
-                                           </Button>
+                                                    {
+                                                        isLoading ? <>
+                                                            <ReloadIcon className="mr-2 h-4 w-4 animate-spin" />
+                                                            Please wait...
+                                                        </> : <>OFFER</>
+                                                    }
+                                                </Button>
                                             )
                                         }
                                     </div>

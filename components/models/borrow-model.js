@@ -675,7 +675,7 @@ export const BorrowModal = () => {
                                         disabled={isLoading}
                                         onClick={borrowModel.onClose}
                                     >
-                                        CLose
+                                        Close
                                     </Button>
 
                                     {

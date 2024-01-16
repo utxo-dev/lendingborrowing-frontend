@@ -23,6 +23,7 @@ import { Player } from '@lottiefiles/react-lottie-player';
 
 
 
+
 export const SuccessModel = () => {
     const successModel = useSuccessModal();
     const { toast } = useToast()

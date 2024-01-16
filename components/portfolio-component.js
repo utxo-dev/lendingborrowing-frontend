@@ -11,28 +11,37 @@ import { isEmpty } from '@/lib/utils';
 const PortfolioComponent = ({ state }) => {
     const walletAddress = useWalletAddress();
     const [activeLoans, setActiveLoans] = useState([]);
+    const [isLoading, setIsLoading] = useState(false);
 
     useEffect(() => {
-
+        setIsLoading(true)
         let active_loans = Object.values(state.active_loans)
             .filter((val) => {
 
                 return val.borrower_ordinals_address == walletAddress.ordinalsAddress | val.lender_payments_address == walletAddress.paymentsAddress
             })
         setActiveLoans(active_loans)
+        setIsLoading(false)
 
-    }, [])
+        return () => {
+            setIsLoading(true)
+
+        }
+
+
+    }, [state])
 
     return (
-        <section className="relative   mx-auto px-4 focus:outline-none sm:px-3 md:px-5">
+        <div className="relative    px-4 focus:outline-none sm:px-3 md:px-5">
             <div className="px-4 my-4">
-                <p className="mt-4 text-3xl sm:text-4xl text-slate-900 font-extrabold tracking-tight dark:text-slate-50 ">
+                <p className="mt-4 text-3xl  text-slate-900 font-semibold tracking-tight dark:text-slate-50 ">
                     Loan Repayment Dashboard
                 </p>
 
             </div>
-            {
-                isEmpty(activeLoans) ? <EmptyState /> : <div className="grid gap-y-16  sm:grid-cols-2 md:grid-cols-3">
+        
+            <Suspense fallback={<p className='bg-yellow'>Loading feed...</p>}>
+            {   isEmpty(activeLoans) ? <EmptyState /> : <div className="grid gap-y-16  sm:grid-cols-2 md:grid-cols-3">
                     {
                         activeLoans.map((active_loan) => {
                             return (
@@ -41,11 +50,12 @@ const PortfolioComponent = ({ state }) => {
                         })
                     }
 
-                </div>
-            }
+                </div> }  
+                </Suspense>
+         
 
 
-        </section>
+        </div>
     )
 
 }
