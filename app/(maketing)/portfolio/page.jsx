@@ -25,6 +25,7 @@ export default async function PortfolioPage() {
 
  async function getState() {
   const response = await fetch("https://oracle.utxo.dev", {
+      cache: 'no-store',
       method: "POST",
       headers: {
           'Content-Type': 'application/json', 
@@ -46,6 +47,7 @@ export default async function PortfolioPage() {
   
 
     const state = JSON.parse(result.result);
+    console.log(state)
 
     return state
 }
