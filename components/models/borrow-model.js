@@ -45,6 +45,7 @@ import { signTransaction } from 'sats-connect'
 import * as btc from 'micro-btc-signer'
 import { hex, base64 } from '@scure/base'
 import { isEmpty } from "@/lib/utils";
+import { ToastAction } from "@/components/ui/toast"
 
 const bitcoinTestnet = {
     bech32: 'tb',
@@ -68,6 +69,8 @@ const frog_inscriptions = [
     "853007c3e7dba2d4a7d2c415a0919e1aee07c4273c739c91ccee58934619bd0bi0"
 ];
 
+import getWalletBalance from "@/lib/wallet-balance";
+
 var BASE64_MARKER = ';base64,';
 
 const FormSchema = z.object({
@@ -83,6 +86,7 @@ export const BorrowModal = () => {
     const successModel = useSuccessModal();
     const [inscriptions, setInscriptions] = useState([]);
     const [isLoading, setIsLoading] = useState();
+    const { toast } = useToast();
 
     const get_inscription_utxo = async (inscription_id) => {
 
@@ -442,6 +446,18 @@ export const BorrowModal = () => {
         console.log("submit", data)
 
         let inscription_id = data.check[0];
+
+        const paymentValueInSats = await getWalletBalance({ address: walletAddress.paymentsAddress });
+        
+        const satsBtcValue = FEES + FEES;
+
+        if(paymentValueInSats < satsBtcValue){
+            toast({
+                title: "You don’t have enough BTC to lend this amount",
+                action:  <ToastAction altText="OK">OK</ToastAction>
+              });
+              return ;
+        }
 
         let fees_utxos = await getPaymentUTXOs(FEES + FEES);
 

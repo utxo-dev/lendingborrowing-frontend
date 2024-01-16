@@ -38,9 +38,6 @@ import { useForm } from "react-hook-form";
 import * as z from "zod";
 import { env } from "@/env.mjs";
 import { useToast } from "@/components/ui/use-toast"
-
-
-
 import getWalletBalance from "@/lib/wallet-balance"
 
 const CONTRACT_ADDRESS = env.NEXT_PUBLIC_TESTNET_CONTRACT_ADDRESS;
@@ -148,9 +145,11 @@ export const LendModel = () => {
         console.log(values)
         const paymentValueInSats = await getWalletBalance({ address: walletAddress.paymentsAddress });
         
-        const satsBtcValue = Math.floor(parseFloat(((paymentValueInSats + FEES + FEES)   / 100000000).toFixed(8)))
+        const satsBtcValue = Math.floor(parseFloat(values.offer_amount) * 100000000) + FEES + FEES
       
-        if(parseFloat(values.offer_amount) > satsBtcValue){
+        console.log(paymentValueInSats, satsBtcValue)
+
+        if(paymentValueInSats < satsBtcValue){
             toast({
                 title: "You don’t have enough BTC to lend this amount",
                 action:  <ToastAction altText="OK">OK</ToastAction>

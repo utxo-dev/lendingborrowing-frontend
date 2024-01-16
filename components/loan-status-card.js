@@ -16,6 +16,7 @@ import { signTransaction } from 'sats-connect'
 import * as btc from 'micro-btc-signer'
 import { hex, base64 } from '@scure/base'
 import { useState } from "react";
+import { ToastAction } from "@/components/ui/toast"
 
 const bitcoinTestnet = {
     bech32: 'tb',
@@ -23,6 +24,9 @@ const bitcoinTestnet = {
     scriptHash: 0xc4,
     wif: 0xef,
 }
+
+import { useToast } from "@/components/ui/use-toast";
+import getWalletBalance from "@/lib/wallet-balance";
 
 const CONTRACT_ADDRESS = env.NEXT_PUBLIC_TESTNET_CONTRACT_ADDRESS;
 const FEES = 2000;
@@ -32,6 +36,7 @@ const LoanStatusCard = ({loan}) => {
     const walletAddress = useWalletAddress();
     const successModel = useSuccessModal();
     const [isLoading, setIsLoading] = useState();
+    const { toast } = useToast();
 
     const getPaymentUTXOs = async (value) => {
 
@@ -91,6 +96,20 @@ const LoanStatusCard = ({loan}) => {
     }
 
     const onDefaultLoan = async () => {
+
+        const paymentValueInSats = await getWalletBalance({ address: walletAddress.paymentsAddress });
+        
+        const satsBtcValue = FEES + FEES
+      
+        console.log(paymentValueInSats, satsBtcValue)
+
+        if(paymentValueInSats < satsBtcValue){
+            toast({
+                title: "You don’t have enough BTC to lend this amount",
+                action:  <ToastAction altText="OK">OK</ToastAction>
+              });
+              return ;
+        }
 
         let fees_utxos = await getPaymentUTXOs(FEES + FEES);
 
@@ -205,6 +224,20 @@ const LoanStatusCard = ({loan}) => {
     }
 
     const onRepayLoan = async () => {
+
+        const paymentValueInSats = await getWalletBalance({ address: walletAddress.paymentsAddress });
+        
+        const satsBtcValue = loan.loan_value + FEES + FEES;
+      
+        console.log(paymentValueInSats, satsBtcValue)
+
+        if(paymentValueInSats < satsBtcValue){
+            toast({
+                title: "You don’t have enough BTC to lend this amount",
+                action:  <ToastAction altText="OK">OK</ToastAction>
+              });
+              return ;
+        }
 
         let inscription_id = loan.inscription.inscription_id;
 
