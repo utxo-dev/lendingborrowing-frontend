@@ -77,9 +77,7 @@ export const LendModel = () => {
         let response = await fetch(`https://mempool.space/testnet/api/address/${walletAddress.paymentsAddress}/utxo`)
         let utxos = await response.json();
 
-        let sorted_utxos = utxos.filter((value) => {
-            return value.status.confirmed
-        }).sort(function (a, b) {
+        let sorted_utxos = utxos.sort(function (a, b) {
             return b.value - a.value;
         })
 
@@ -145,9 +143,9 @@ export const LendModel = () => {
         console.log(values)
         const paymentValueInSats = await getWalletBalance({ address: walletAddress.paymentsAddress });
         
-        const satsBtcValue = Math.floor(parseFloat(values.offer_amount) * 100000000) + FEES + FEES
+        const satsBtcValue = parseFloat(values.offer_amount) * 100000000 + FEES + FEES
       
-        console.log(paymentValueInSats, satsBtcValue)
+        console.log("paymentValueInSats", paymentValueInSats, satsBtcValue)
 
         if(paymentValueInSats < satsBtcValue){
             toast({
